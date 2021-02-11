@@ -1,10 +1,11 @@
 module Haskinator (main) where
 
+-- Por ahora dejare los imports implicitos para conocer el namespace
 import System.IO (hFlush, stdout, stderr, hPutStrLn, )
 import Data.Char (toLower)
 import Oraculo
 
--- type State = (Oraculo, ... ) 
+-- type State = (Oraculo, ... )  .. estado a definir que recibiran algunas funciones para trabajar con el oraculo 
 
 main = putStrLn introduction >> parser
 
@@ -59,13 +60,13 @@ prompt :: String
 prompt = "Haskinator>"
 
 -- Lista de asociaciones para el parser
-dispatch :: [ (String,Oraculo -> IO ()) ] -- [ (String, Oraculo -> IO () ) ]
+dispatch :: [ (String,Oraculo -> IO ()) ]
 dispatch = zip nombres funciones
 
 nombres :: [String] 
 nombres = ["crear","predecir","persistir","cargar","consultar"]
 
-funciones :: [ Oraculo -> IO () ] -- State -> IO () 
+funciones :: [ Oraculo -> IO () ] 
 funciones = [ create, predict, persist, load, strangeQuery, exit ] 
 
 -- String de presentacion
