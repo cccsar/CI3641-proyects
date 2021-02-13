@@ -2,8 +2,11 @@ module Haskinator (main) where
 
 -- Por ahora dejare los imports implicitos para conocer el namespace
 
+-- Local imports 
 import Oraculo
+import Constants as C
 
+-- Haskell imports
 import Data.Char (toLower)
 import qualified Data.Map as M (toList)
 import System.IO (hFlush, stdout, stderr, hPutStrLn )
@@ -11,45 +14,45 @@ import System.Exit
 
 -- type State = (Oraculo, ... )  .. estado a definir que recibiran algunas funciones para trabajar con el oraculo 
 
-main = putStrLn introduction >> parser Nothing
+main = putStrLn C.introduction >> parser Nothing
 
-{- Helper functions -} 
+{- Helper functions -}
 
 -- Controla el flujo inicial de ejecucion
-parser :: Maybe Oraculo -> IO () 
-parser xd = do 
- mapM_ putStrLn (zipWith (++) (repeat "* ") nombres)
+parser :: Maybe Oraculo -> IO ()
+parser xd = do
+ mapM_ (putStrLn . (++ "* ")) nombres
  opt <- getInLine "Escoga una opcion: "
 
  let choice = lookup (map toLower opt) dispatch -- busca opcion en lista de asociacioens
 
- case choice of 
+ case choice of
   Nothing -> hPutStrLn stderr "Haskinator> Seleccione una opcion valida!" >> parser xd
-  Just x  -> undefined 
+  Just x  -> undefined
 
 
 
 -- Permite mostrar un string y solicitar input en la misma linea
 getInLine :: String -> IO String
-getInLine ss = do 
+getInLine ss = do
   putStr (prompt ++ (' ':ss) )
   inp <- getLine
   hFlush stdout
-  return inp 
+  return inp
 
 
 -- Funcion para imprimir una representacion decente de las opcioens
 prettyOptions :: Oraculo -> IO ()
 prettyOptions (Pregunta s opts) = do
-  getInLine s 
+  getInLine s
   mapM_ putStrLn answers
- where 
+ where
   answers = map fst . M.toList $ opts
-  neat = zipWith (++) (repeat "* ") answers
- 
-  
+  neat = map (++ "* ") answers
 
-{- Necessary functions -} 
+
+
+{- Necessary functions -}
 
 create, predict, persist, load, strangeQuery, exit :: Maybe Oraculo -> IO () -- State -> IO () 
 
@@ -77,14 +80,9 @@ prompt = "Haskinator>"
 
 -- Lista de asociaciones para el parser: problema .. tipos distintos 
 dispatch :: [ (String, Maybe Oraculo -> IO ()) ]
-dispatch = zip nombres funciones
+dispatch = zip C.nombres funciones
 
-nombres :: [String] 
-nombres = ["crear","predecir","persistir","cargar","consultar"]
+funciones :: [ Maybe Oraculo -> IO () ]
+funciones = [ create, predict, persist, load, strangeQuery]
 
-funciones :: [ Maybe Oraculo -> IO () ] 
-funciones = [ create, predict, persist, load, strangeQuery] 
 
--- String de presentacion
-introduction :: String
-introduction = "This is Haskinator! the great oracle!"
