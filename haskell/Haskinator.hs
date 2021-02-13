@@ -1,56 +1,72 @@
 module Haskinator (main) where
 
 -- Por ahora dejare los imports implicitos para conocer el namespace
-import System.IO (hFlush, stdout, stderr, hPutStrLn, )
-import Data.Char (toLower)
+
 import Oraculo
+
+import Data.Char (toLower)
+import qualified Data.Map as M (toList)
+import System.IO (hFlush, stdout, stderr, hPutStrLn )
+import System.Exit
 
 -- type State = (Oraculo, ... )  .. estado a definir que recibiran algunas funciones para trabajar con el oraculo 
 
-main = putStrLn introduction >> parser
+main = putStrLn introduction >> parser Nothing
 
 {- Helper functions -} 
 
 -- Controla el flujo inicial de ejecucion
-parser :: IO () 
-parser = do 
-  mapM_ putStrLn (zipWith (++) (repeat "* ") nombres)
-  opt <- safeReadInLine "Escoga una opcion: "
+parser :: Maybe Oraculo -> IO () 
+parser xd = do 
+ mapM_ putStrLn (zipWith (++) (repeat "* ") nombres)
+ opt <- getInLine "Escoga una opcion: "
 
-  let choice = lookup (map toLower opt) dispatch -- busca opcion en lista de asociacioens
+ let choice = lookup (map toLower opt) dispatch -- busca opcion en lista de asociacioens
 
-  case choice of 
-   Nothing -> hPutStrLn stderr "Haskinator> Seleccione una opcion valida!" >> parser
-   Just x  -> undefined 
+ case choice of 
+  Nothing -> hPutStrLn stderr "Haskinator> Seleccione una opcion valida!" >> parser xd
+  Just x  -> undefined 
 
 
--- Muestra un prompt con el nombre de haskinator siempre que se solicite
--- input al usuario.
 
 -- Permite mostrar un string y solicitar input en la misma linea
-safeReadInLine :: String -> IO String
-safeReadInLine ss = do 
+getInLine :: String -> IO String
+getInLine ss = do 
   putStr (prompt ++ (' ':ss) )
   inp <- getLine
   hFlush stdout
   return inp 
+
+
+-- Funcion para imprimir una representacion decente de las opcioens
+prettyOptions :: Oraculo -> IO ()
+prettyOptions (Pregunta s opts) = do
+  getInLine s 
+  mapM_ putStrLn answers
+ where 
+  answers = map fst . M.toList $ opts
+  neat = zipWith (++) (repeat "* ") answers
+ 
   
 
 {- Necessary functions -} 
 
-create, predict, persist, load, strangeQuery, exit :: Oraculo -> IO () -- State -> IO () 
+create, predict, persist, load, strangeQuery, exit :: Maybe Oraculo -> IO () -- State -> IO () 
 
 create = undefined
 
-predict = undefined
-
-persist = undefined
-
-load = undefined
-
 strangeQuery = undefined
 
-exit = undefined
+predict = undefined
+
+--Funciones relacionadas con manejo de archivos
+persist = undefined
+load = undefined
+-- 
+
+exit _ = exitSuccess
+
+
 
 
 {- Constants -}
@@ -59,15 +75,15 @@ exit = undefined
 prompt :: String
 prompt = "Haskinator>"
 
--- Lista de asociaciones para el parser
-dispatch :: [ (String,Oraculo -> IO ()) ]
+-- Lista de asociaciones para el parser: problema .. tipos distintos 
+dispatch :: [ (String, Maybe Oraculo -> IO ()) ]
 dispatch = zip nombres funciones
 
 nombres :: [String] 
 nombres = ["crear","predecir","persistir","cargar","consultar"]
 
-funciones :: [ Oraculo -> IO () ] 
-funciones = [ create, predict, persist, load, strangeQuery, exit ] 
+funciones :: [ Maybe Oraculo -> IO () ] 
+funciones = [ create, predict, persist, load, strangeQuery] 
 
 -- String de presentacion
 introduction :: String
