@@ -1,4 +1,4 @@
-module Haskinator (main) where
+module Main (main) where
 
 -- Por ahora dejare los imports implicitos para conocer el namespace
 
@@ -21,14 +21,14 @@ main = putStrLn C.introduction >> parser Nothing
 -- Controla el flujo inicial de ejecucion
 parser :: Maybe Oraculo -> IO ()
 parser xd = do
- mapM_ (putStrLn . (++ "* ")) nombres
- opt <- getInLine "Escoga una opcion: "
+  mapM_ (putStrLn . ("* " ++)) nombres
+  opt <- getInLine "Escoga una opcion: "
 
- let choice = lookup (map toLower opt) dispatch -- busca opcion en lista de asociacioens
+  let choice = lookup (map toLower opt) dispatch -- busca opcion en lista de asociacioens
 
- case choice of
-  Nothing -> hPutStrLn stderr "Haskinator> Seleccione una opcion valida!" >> parser xd
-  Just x  -> undefined
+  case choice of
+    Nothing -> hPutStrLn stderr "Haskinator> Seleccione una opcion valida!" >> parser xd
+    Just x  -> undefined
 
 
 
