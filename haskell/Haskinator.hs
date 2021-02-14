@@ -10,7 +10,7 @@ import System.IO (hFlush, stdout, stderr, hPutStrLn )
 import System.Exit
 
 
-main = putStrLn introduction >> parser sampleOraculo_1  -- por ahora
+main = putStrLn introduction >> parser sampleOraculo1  -- por ahora
 
 
 {- Helper functions -}

@@ -52,7 +52,7 @@ closingQM = char '?'
 -- Parser para caracteres validos
 valid :: ReadP Char
 valid = satisfy isQM 
- where  isQM c = c /= '?' && c /= '¿' && c /= '-' && c /= ':'
+ where  isQM c = c /= '?' && c /= '¿' && c /= '-' && c /= ':' && c /= '\n'
 
 
 text, qP, optionP :: ReadP String
@@ -64,43 +64,50 @@ text = many1 valid
 qP  = between (openingQM >> skipSpaces) (skipSpaces >> closingQM) text
 
 optionP = between dashP colonP text -- tentative
- where dashP   = char '-' >> skipSpaces ; colonP  = char ':' >> skipSpaces
-
-
+ where dashP   = char '-' >> skipSpaces ; colonP  = skipSpaces >> char ':'
 
 {- Parsers para el tipo de datos en cuestion -}
 
 questionP, predictionP, oracleP :: Int -> ReadP Oraculo
 
 -- Parsea texto correspondiente al constructor 'Pregunta'
-questionP n = do -- liftA2 Pregunta qP mapP
+questionP n = do 
   p <- qP 
-  count 1 (char '\n') -- skipSpaces
+  count 1 (char '\n') 
   q <- mapP (n+3)
   return (Pregunta p q) 
 
 -- Parsea texto correspondiente al constructor 'Prediccion'
-predictionP _ = do -- Prediccion <$> text 
+predictionP _ = do 
   x <- text 
+  count 1 (char '\n')
   return (Prediccion x) 
 
 -- Parsea el mapa de opciones para el constructor 'Pregunta'
 mapP :: Int -> ReadP (M.Map String Oraculo)
-mapP n = M.fromList <$> many1 mapBody -- el peo esta aqui
+mapP n = M.fromList <$> many1 mapBody
  where 
   -- mapBody :: ReadP Oraculo 
   mapBody = do 
    count n (char ' ') 
    p <- optionP 
-   skipSpaces
+   count 1 (char ' ') 
    q <- oracleP n
-   skipSpaces
    return (p,q) 
 
 -- Parsea el tipo de datos Oraculo, a saber o una pregunta, o una prediccion
 oracleP n = choice [ questionP n , predictionP n] 
   
-
+-- Test basico para leer
+sampleText = "¿Eres venezolano?\n"++
+             "   -si: ¿eres mayor de edad?\n"++
+             "      -si: mal por ti\n"++
+             "      -no: aun hay esperanza, huye\n"++
+             "   -no: ¿que se siente comer bien?\n"++
+             "      -es lo mejor del mundo: ¿por que lo dices?\n"++
+             "         -porque si: ok\n"++
+             "         -no quiero responder: ok\n"++
+             "      -no es la gran cosa: no sabes lo que estas diciendo\n"
 
 -- Pregunta string prediccion | Pregunta String (Pregunta) Prediccion
 
@@ -114,7 +121,7 @@ oracleP n = choice [ questionP n , predictionP n]
 
 
 -- Parser tester
-runParser :: Show a => String -> ReadP a -> (a,String)
+runParser :: String -> ReadP Oraculo -> (Oraculo,String)
 runParser ss p = case readP_to_S p ss of 
   [] -> error "Failed parsing" 
   xs -> last xs
@@ -182,19 +189,3 @@ sampleTree = Branch 'a'
                   Leaf 'v' ] ] ], 
                Branch 'f' [
                 Leaf 'z' ] ]
-                   
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
