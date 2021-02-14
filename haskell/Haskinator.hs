@@ -10,22 +10,24 @@ import System.IO (hFlush, stdout, stderr, hPutStrLn )
 import System.Exit
 
 
-main = putStrLn introduction >> parser Nothing
+main = putStrLn introduction >> parser sampleOraculo_1  -- por ahora
 
 
 {- Helper functions -}
 
 -- Controla el flujo inicial de ejecucion
-parser :: Maybe Oraculo -> IO ()
+parser :: Oraculo -> IO ()
 parser xd = do
+  putLine preface
   mapM_ (putStrLn . ("* " ++)) nombres
+
   opt <- getInLine "Escoga una opcion: "
 
   let choice = lookup (map toLower opt) dispatch -- busca opcion en lista de asociacioens
 
   case choice of
     Nothing -> hPutStrLn stderr "Haskinator> Seleccione una opcion valida!" >> parser xd
-    Just x  -> undefined
+    Just x  -> begin >> x xd
 
 
 -- Permite mostrar un string y solicitar input en la misma linea
@@ -35,6 +37,11 @@ getInLine ss = do
   inp <- getLine
   hFlush stdout
   return inp
+
+
+-- Print a Haskinator message
+putLine :: String -> IO () 
+putLine ss =  putStrLn (prompt ++ (' ':ss)) 
 
 
 -- Funcion para imprimir una representacion decente de las opcioens
@@ -47,24 +54,20 @@ prettyOptions (Pregunta s opts) = do
   neat = map (++ "* ") answers
 
 
+-- Limpia la pantalla
+clearScreen :: IO ()
+clearScreen = putStr "\ESC[2J"
 
-{- Necessary functions -}
 
-create, predict, persist, load, strangeQuery, exit :: Maybe Oraculo -> IO () 
+-- Se mueve a una posicion en la pantalla
+goTo :: (Int,Int) -> IO ()
+goTo (x, y) = putStr ("\ESC[" ++ show y ++ ";" ++ show x ++ "H")
 
-create = undefined
 
-predict = undefined
+-- Limpia la pantalla y reajusta la posicion del prompt
+begin :: IO ()
+begin = clearScreen >> goTo (0,0) 
 
---Funciones relacionadas con manejo de archivos
-persist = undefined
-
-load = undefined
--- 
-
-exit _ = exitSuccess
-
-strangeQuery = undefined
 
 -- Calcula el lca para dos strings correspondientes a dos predicciones
 -- en un oraculo.
@@ -74,7 +77,6 @@ lcaOraculo firstS secondS o =
      [a,b] -> Just (fst . last . takeWhile (\(a,b) -> a == b) . zip (reverse a) $ (reverse b))
      _     -> Nothing
  where
-
   result = lookupT [] firstS secondS o 
 
   -- lookupT :: [String] -> String -> String -> Oraculo -> [[String]]
@@ -83,44 +85,71 @@ lcaOraculo firstS secondS o =
     | otherwise        = [] 
   lookupT path a b (Pregunta s mp) 
     | a == s || b == s = [ s:path ] 
-    | otherwise        = concatMap (lookupT path a b) (map snd . M.toList $ mp) 
-   
-{-
--- For this to work all elements on the tree must be different as well as 
--- elements to search.
-lca :: Eq a => a -> a -> Tree a -> Maybe a 
-lca a b t = case found of 
-             [a,b] -> Just . fst . last . takeWhile (\(a,b) -> a == b) . zip (reverse a) $ (reverse b)
-             _     -> Nothing
- where 
-  found = lookupT [] a b t  
+    | otherwise        = concatMap (lookupT (s:path) a b) (map snd . M.toList $ mp) 
 
-  --lookupT :: Eq a => [a] -> a -> a -> Tree a -> [[a]] 
-  lookupT z a b (Branch e xs) 
-   | e == a || e == b = [ e:z ] 
-   | otherwise        = concatMap (lookupT (e:z) a b) xs
-  lookupT z a b (Leaf e) 
-   | e == a || e == b = [ e:z ]
-   | otherwise        = []
--}
+
+{- Necessary functions -}
+
+
+create, predict, persist, load, importantQuestion, exit :: Oraculo -> IO () 
+
+
+create = undefined
+
+predict = undefined
+
+persist = undefined
+
+load = undefined
+
+importantQuestion sybil = do 
+ putLine "Dame dos strings que representen predicciones!. Buscare la pregunta que tienen en comun."
+
+ first  <- getInLine "Primer String: "
+ second <- getInLine "Segundo String: "
+
+ let out = lcaOraculo first second sybil 
+
+ case out of 
+  Nothing -> hPutStrLn stderr "Error: Consulta invalida. Por favor intente de nuevo" >> importantQuestion sybil
+  Just x  -> do 
+   putLine $ "La pregunta que lleva a las predicciones: "++"\""++first++"\" y \""++second++"\" es:"
+   putStrLn ("\t\t"++x)
+   parser sybil
+
+
+exit _ = exitSuccess
+
 
 
 {- Constants -}
+
 
 -- Prompt a usar 
 prompt :: String
 prompt = "Haskinator>"
 
+
 -- Lista de asociaciones para el parser: problema .. tipos distintos 
-dispatch :: [ (String, Maybe Oraculo -> IO ()) ]
+dispatch :: [ (String, Oraculo -> IO ()) ]
 dispatch = zip nombres funciones
+
 
 -- Nombres de las opciones del cliente (que se asocian a funciones)
 nombres :: [String]
 nombres = [ "crear", "predecir", "persistir", "cargar", "pregunta crucial", "salir" ]
 
--- Funciones que corresponden a las opciones del cliente
-funciones :: [ Maybe Oraculo -> IO () ]
-funciones = [ create, predict, persist, load, strangeQuery]
 
-introduction = ""
+-- Funciones que corresponden a las opciones del cliente
+funciones :: [ Oraculo -> IO () ]
+funciones = [ create, predict, persist, load, importantQuestion, exit]
+
+
+-- Bienvenida al usuario
+introduction = " Bienvenido a mi humilde morada viajero!\n ¿Estas listo para presenciar las increibles"++
+               " pero efectivas habilidades de este viejo oráculo?"
+
+
+-- Pregunta de rutina en dialogo repetitivo
+preface :: String
+preface = " Dime, ¿qué deseas hacer?" 
