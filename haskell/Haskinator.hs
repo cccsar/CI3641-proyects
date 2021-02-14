@@ -1,10 +1,7 @@
 module Main (main) where
 
--- Por ahora dejare los imports implicitos para conocer el namespace
-
 -- Local imports 
 import Oraculo
-import Constants as C
 
 -- Haskell imports
 import Data.Char (toLower)
@@ -12,9 +9,9 @@ import qualified Data.Map as M (toList)
 import System.IO (hFlush, stdout, stderr, hPutStrLn )
 import System.Exit
 
--- type State = (Oraculo, ... )  .. estado a definir que recibiran algunas funciones para trabajar con el oraculo 
 
-main = putStrLn C.introduction >> parser Nothing
+main = putStrLn introduction >> parser Nothing
+
 
 {- Helper functions -}
 
@@ -29,7 +26,6 @@ parser xd = do
   case choice of
     Nothing -> hPutStrLn stderr "Haskinator> Seleccione una opcion valida!" >> parser xd
     Just x  -> undefined
-
 
 
 -- Permite mostrar un string y solicitar input en la misma linea
@@ -54,22 +50,21 @@ prettyOptions (Pregunta s opts) = do
 
 {- Necessary functions -}
 
-create, predict, persist, load, strangeQuery, exit :: Maybe Oraculo -> IO () -- State -> IO () 
+create, predict, persist, load, strangeQuery, exit :: Maybe Oraculo -> IO () 
 
 create = undefined
-
-strangeQuery = undefined
 
 predict = undefined
 
 --Funciones relacionadas con manejo de archivos
 persist = undefined
+
 load = undefined
 -- 
 
 exit _ = exitSuccess
 
-
+strangeQuery = undefined
 
 
 {- Constants -}
@@ -80,9 +75,14 @@ prompt = "Haskinator>"
 
 -- Lista de asociaciones para el parser: problema .. tipos distintos 
 dispatch :: [ (String, Maybe Oraculo -> IO ()) ]
-dispatch = zip C.nombres funciones
+dispatch = zip nombres funciones
 
+-- Nombres de las opciones del cliente (que se asocian a funciones)
+nombres :: [String]
+nombres = [ "crear", "predecir", "persistir", "cargar", "pregunta crucial", "salir" ]
+
+-- Funciones que corresponden a las opciones del cliente
 funciones :: [ Maybe Oraculo -> IO () ]
 funciones = [ create, predict, persist, load, strangeQuery]
 
-
+introduction = ""
