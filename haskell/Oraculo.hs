@@ -1,4 +1,10 @@
-module Oraculo where
+module Oraculo (
+  Oraculo (..) , 
+  crearOraculo, 
+  respuesta, 
+  ramificar,
+  sampleOraculo_1
+) where
 
 import qualified Data.Map as M
  
