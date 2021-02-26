@@ -10,55 +10,25 @@ import qualified Data.Map   as M (toList, keys, fromList, lookup, Map, insert)
 import qualified Data.Maybe as MB(fromJust)
 import System.IO (hFlush, stdout, stderr, hPutStrLn )
 import System.Exit
+import Control.Monad(unless)
 
 
-_main = putStrLn introduction >> parser sampleOraculo  -- por ahora
-
-main = predict (Pregunta "¿Flotan los monos?" (M.fromList [("si", Prediccion "si"),("no", Prediccion "no")]))
+main = client (Prediccion "42")
 
 {- Helper functions -}
 client :: Oraculo -> IO ()
-client xd = do
+client or = do
   opt <- askOptions names
 
   let f = MB.fromJust . M.lookup opt $ nameToFunc
 
-  f xd >>= client
+  unless (opt=="salir") $ f or >>= client
+  
   where
     functions :: M.Map String (Oraculo -> IO  Oraculo)
     functions = M.fromList [("predecir", predict)]
 
-
-
-
-
--- Controla el flujo inicial de ejecucion
-parser :: Oraculo -> IO ()
-parser xd = do
-  putLine preface
-  mapM_ (putStrLn . ("* " ++)) nombres
-
-  opt <- getInLine "Escoga una opcion: "
-
-  let choice = lookup (map toLower opt) dispatch -- busca opcion en lista de asociacioens
-
-  case choice of
-    Nothing -> hPutStrLn stderr "Haskinator> Seleccione una opcion valida!" >> parser xd
-    Just x  -> undefined 
-
 {----------- Main Functions -----------}
-nameToFunc :: M.Map String (Oraculo -> IO Oraculo)
-nameToFunc = M.fromList [("Predecir", predict)]
-
-names = M.keys nameToFunc
-
-create', predict', persist', load', strangeQuery', exit', importantQuestion' :: Oraculo -> IO () --deprecation
-
-importantQuestion' = undefined 
-predict' = undefined 
-create' = undefined
-
-strangeQuery' = undefined
 
 -- Prediction function as described in the pdf 
 predict :: Oraculo -> IO Oraculo
@@ -68,13 +38,13 @@ predict q@Pregunta{pregunta = p, opciones = opts} = do
 
   -- prompt for an answer
   putStrLn p
-  ans <- askOptions userOpts
+  opt <- askOptions userOpts
 
-  if ans == noOption
-    then putStrLn "oh no" >> askValidOption q
+  if opt == noOption
+    then askValidOption q
     else do
-      newOraculo <- predict $ respuesta q ans
-      return q{opciones = M.insert ans newOraculo opts}
+      newOraculo <- predict $ respuesta q opt
+      return q{opciones = M.insert opt newOraculo opts}
 
   where
     askValidOption :: Oraculo -> IO Oraculo -- (pregunta, respuesta)
@@ -84,11 +54,12 @@ predict q@Pregunta{pregunta = p, opciones = opts} = do
 
       -- Pedir la opcion que esperaba
       option <- getInLine askForExpectedOption
+
       -- Pedir la respuesta que esperaba
       answer <- getInLine askForExpectedAnswer
 
       -- Actualizar este oraculo con una nueva opcion respuesta
-      let newOpts = M.insert option (crearOraculo answer) opts
+      let newOpts = M.insert option (Prediccion answer) opts
 
       return q{opciones=newOpts}
     
@@ -101,7 +72,7 @@ predict prd@(Prediccion p) = do
 
   if selection == yes
     then return prd -- If we win, keep the same oraculo 
-    else putStrLn failMessage >> return prd 
+    else putStrLn failMessage >> askNewQuestion
   where
     askNewQuestion :: IO Oraculo
     askNewQuestion = do
@@ -113,10 +84,35 @@ predict prd@(Prediccion p) = do
 
       -- ask an option that should lead to the answer
       newOption <- getInLine askOption
-      undefined -- me quede aquí
 
+      -- ask an option that should lead to our current answer
+      newOptionForOldAns <- getInLine . askOptionForInvalidAns $ p
 
+      return $ ramificar [newOptionForOldAns, newOption] [prd, Prediccion actualAns] importantQuestion
 
+-- create a new oraculo from a given prediction.
+create :: Oraculo -> IO Oraculo
+create _ = do 
+  -- get a new prediction
+  prd <- getInLine askForNewPrediction
+  
+  return $ Prediccion prd
+
+importantQuestion :: Oraculo -> IO Oraculo
+importantQuestion sybil = do 
+ putLine "Dame dos strings que representen predicciones!. Buscare la pregunta que tienen en comun."
+
+ first  <- getInLine "Primer String: "
+ second <- getInLine "Segundo String: "
+
+ let out = lcaOraculo first second sybil 
+
+ case out of 
+  Nothing -> hPutStrLn stderr "Error: Consulta invalida. Por favor intente de nuevo" >> importantQuestion sybil
+  Just x  -> do 
+   putLine $ "La pregunta que lleva a las predicciones: "++"\""++first++"\" y \""++second++"\" es:"
+   putStrLn ("\t\t"++x)
+   return sybil
 
 --Funciones relacionadas con manejo de archivos
 persist' = undefined
@@ -131,7 +127,7 @@ exit' _ = exitSuccess
 -- Permite mostrar un string y solicitar input en la misma linea
 getInLine :: String -> IO String
 getInLine ss = do
-  putStr ss
+  putStrLn ss
   putStr $ prompt ++ " "
   hFlush stdout
   inp <- getLine
@@ -216,6 +212,16 @@ lcaOraculo firstS secondS o =
 
 
 {----------- Constants -----------}
+
+nameToFunc :: M.Map String (Oraculo -> IO Oraculo)
+nameToFunc = M.fromList [
+    ("Predecir", predict),
+    ("Crear", create)
+  ]
+
+names = M.keys nameToFunc
+
+
 -- String de presentacion
 introduction :: String
 introduction = " Bienvenido a mi humilde morada viajero!\n ¿Estas listo para presenciar las increibles"++
@@ -237,23 +243,8 @@ optionOutOfRange = "Esa no es una opción válida. Intenta de nuevo"
 prompt :: String
 prompt = "Haskinator>"
 
-importantQuestion sybil = do 
- putLine "Dame dos strings que representen predicciones!. Buscare la pregunta que tienen en comun."
-
- first  <- getInLine "Primer String: "
- second <- getInLine "Segundo String: "
-
- let out = lcaOraculo first second sybil 
-
- case out of 
-  Nothing -> hPutStrLn stderr "Error: Consulta invalida. Por favor intente de nuevo" >> importantQuestion sybil
-  Just x  -> do 
-   putLine $ "La pregunta que lleva a las predicciones: "++"\""++first++"\" y \""++second++"\" es:"
-   putStrLn ("\t\t"++x)
-   parser sybil
-
-
 exit _ = exitSuccess
+
 -- No option literal
 noOption :: String
 noOption = "Ninguna"
@@ -288,17 +279,12 @@ askForImportatQuestion = "¿Qué pregunta me habría llevado a esa respuesta?"
 askOption :: String 
 askOption = "¿Qué opción me llevaría a esa respuesta?"
 
+askOptionForInvalidAns :: String -> String 
+askOptionForInvalidAns s = "¿Qué opción me debería llevar a '" ++ s ++ "'?"
 
--- Lista de asociaciones para el parser: problema .. tipos distintos 
-dispatch :: [ (String, Oraculo -> IO ()) ]
-dispatch = zip nombres funciones
-
--- Funciones que corresponden a las opciones del cliente
-funciones :: [ Oraculo -> IO () ]
-funciones = [ create', predict', persist', load', importantQuestion', exit']
-
-
-
+-- Solicitar una prediccion para crear oraculo nuevo
+askForNewPrediction :: String
+askForNewPrediction = "Dame una predicción, lo primero que se te ocurra"
 
 -- Pregunta de rutina en dialogo repetitivo
 preface :: String
