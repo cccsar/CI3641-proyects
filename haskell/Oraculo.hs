@@ -3,7 +3,8 @@ module Oraculo (
   crearOraculo, 
   respuesta, 
   ramificar,
-  sampleOraculo
+  sampleOraculo,
+  sampleText
 ) where
 
 import qualified Data.Map as M

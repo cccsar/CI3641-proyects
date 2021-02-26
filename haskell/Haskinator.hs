@@ -8,6 +8,7 @@ import Data.Char (toLower)
 import qualified Text.Read  as R (readMaybe)
 import qualified Data.Map   as M (toList, keys, fromList, lookup, Map, insert)
 import qualified Data.Maybe as MB(fromJust)
+import System.Directory (doesFileExist)
 import System.IO (hFlush, stdout, stderr, hPutStrLn )
 import System.Exit
 import Control.Monad(unless)
@@ -117,10 +118,26 @@ importantQuestion sybil = do
 
 --Funciones relacionadas con manejo de archivos
 persist :: Oraculo -> IO Oraculo 
-persist = undefined
+persist sybil = do 
+  name <- getInLine "Dame un nombre de archivo para guardar al oraculo: " 
+
+  writeFile name (show sybil++"\n") 
+
+  return sybil 
+ 
 
 load :: Oraculo -> IO Oraculo 
-load = undefined
+load sybil = do 
+  name <- getInLine "Dame un nombre de archivo de donde cargar el oraculo" 
+
+  cond <- doesFileExist name
+
+  if cond then do  
+    content <- readFile name 
+    return (read content)
+  else do 
+    putLine "El nombre de archivo proporcionado no corresponde a un archivo existente." 
+    return sybil
 
 {----------- Utils -----------}
 -- Permite mostrar un string y solicitar input en la misma linea
