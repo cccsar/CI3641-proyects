@@ -18,11 +18,12 @@ main = client (Prediccion "42")
 {- Helper functions -}
 client :: Oraculo -> IO ()
 client or = do
-  opt <- askOptions names
+  putStrLn introduction
+  opt <- askOptions (names ++ [exit])
 
   let f = MB.fromJust . M.lookup opt $ nameToFunc
 
-  unless (opt=="salir") $ f or >>= client
+  unless (opt==exit) $ f or >>= client
   
   where
     functions :: M.Map String (Oraculo -> IO  Oraculo)
@@ -95,33 +96,31 @@ create :: Oraculo -> IO Oraculo
 create _ = do 
   -- get a new prediction
   prd <- getInLine askForNewPrediction
-  
+
   return $ Prediccion prd
 
 importantQuestion :: Oraculo -> IO Oraculo
-importantQuestion sybil = do 
- putLine "Dame dos strings que representen predicciones!. Buscare la pregunta que tienen en comun."
+importantQuestion sybil = do
+  putLine "Dame dos strings que representen predicciones!. Buscare la pregunta que tienen en comun."
 
- first  <- getInLine "Primer String: "
- second <- getInLine "Segundo String: "
+  first  <- getInLine "Primer String: "
+  second <- getInLine "Segundo String: "
 
- let out = lcaOraculo first second sybil 
+  let out = lcaOraculo first second sybil 
 
- case out of 
-  Nothing -> hPutStrLn stderr "Error: Consulta invalida. Por favor intente de nuevo" >> importantQuestion sybil
-  Just x  -> do 
-   putLine $ "La pregunta que lleva a las predicciones: "++"\""++first++"\" y \""++second++"\" es:"
-   putStrLn ("\t\t"++x)
-   return sybil
+  case out of 
+    Nothing -> hPutStrLn stderr "Error: Consulta invalida. Por favor intente de nuevo" >> importantQuestion sybil
+    Just x  -> do 
+    putLine $ "La pregunta que lleva a las predicciones: "++"\""++first++"\" y \""++second++"\" es:"
+    putStrLn ("\t\t"++x)
+    return sybil
 
 --Funciones relacionadas con manejo de archivos
-persist' = undefined
-load' = undefined
--- 
+persist :: Oraculo -> IO Oraculo 
+persist = undefined
 
-exit' _ = exitSuccess
-
-
+load :: Oraculo -> IO Oraculo 
+load = undefined
 
 {----------- Utils -----------}
 -- Permite mostrar un string y solicitar input en la misma linea
@@ -216,12 +215,14 @@ lcaOraculo firstS secondS o =
 nameToFunc :: M.Map String (Oraculo -> IO Oraculo)
 nameToFunc = M.fromList [
     ("Predecir", predict),
-    ("Crear", create)
+    ("Crear", create),
+    ("Cargar", load),
+    ("Persistir", persist)
   ]
 
 names = M.keys nameToFunc
 
-
+exit = "salir"
 -- String de presentacion
 introduction :: String
 introduction = " Bienvenido a mi humilde morada viajero!\n ¿Estas listo para presenciar las increibles"++
@@ -242,8 +243,6 @@ optionOutOfRange = "Esa no es una opción válida. Intenta de nuevo"
 -- Prompt a usar 
 prompt :: String
 prompt = "Haskinator>"
-
-exit _ = exitSuccess
 
 -- No option literal
 noOption :: String
