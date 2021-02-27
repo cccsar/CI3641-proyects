@@ -1,0 +1,7 @@
+¿Eres hombre?
+   -No: ¿Eres veneco?
+      -No: Bendecida y afortunada
+      -Si: tu futuro es incierto
+   -Si: ¿Te gusta el pan?
+      -No: sano
+      -Si: gordo

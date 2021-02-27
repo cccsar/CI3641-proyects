@@ -7,6 +7,7 @@ module Oraculo (
   sampleText
 ) where
 
+
 import qualified Data.Map as M
 import Text.ParserCombinators.ReadP
  

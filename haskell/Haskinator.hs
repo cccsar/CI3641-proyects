@@ -12,7 +12,7 @@ import System.IO (hFlush, stdout, stderr, hPutStrLn )
 import Control.Monad(unless)
 
 
-main = client (Prediccion "42")
+main = client sampleOraculo
 
 
 {- Helper functions -}
@@ -102,21 +102,26 @@ create _ = do
 
   return $ Prediccion prd
 
+
+-- Solicita dos strings correspondientes a predicciones en el oraculo y dice que pregunta llevaria a 
+-- ambas predicciones.
 importantQuestion :: Oraculo -> IO Oraculo
 importantQuestion sybil = do
   putLine "Dame dos strings que representen predicciones!. Buscare la pregunta que tienen en comun."
 
-  first  <- getInLine "Primer String: "
-  second <- getInLine "Segundo String: "
+  first  <- getInLine' "Primer String: "
+  second <- getInLine' "Segundo String: "
 
   let out = lcaOraculo first second sybil 
 
   case out of 
-    Nothing -> hPutStrLn stderr "Error: Consulta invalida. Por favor intente de nuevo" >> importantQuestion sybil
+    Nothing -> do
+     putLine "Consulta invalida. Debe ingresar dos strings que representen predicciones en el oraculo" 
+     return sybil
     Just x  -> do 
-    putLine $ "La pregunta que lleva a las predicciones: "++"\""++first++"\" y \""++second++"\" es:"
-    putStrLn ("\t\t"++x)
-    return sybil
+     putLine $ "La pregunta que lleva a las predicciones: "++"\""++first++"\" y \""++second++"\" es:"
+     putStrLn ("\t\t"++x)
+     return sybil
 
 
 --Guarda una representacion textual del oraculo a un archivo.
@@ -155,6 +160,14 @@ getInLine ss = do
   inp <- getLine
   hFlush stdout
   return inp
+
+-- Similar a la funcion anterior pero sin el prompt de haskinator
+getInLine' :: String -> IO String
+getInLine' ss = do 
+  putStr ss
+  hFlush stdout
+  inp <- getLine
+  return inp 
 
 
 -- Print a Haskinator message

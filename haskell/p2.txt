@@ -1,0 +1,9 @@
+¿Eres venezolano?
+   -si: ¿eres mayor de edad?
+      -si: mal por ti
+      -no: aun hay esperanza, huye
+   -no: ¿que se siente comer bien?
+      -es lo mejor del mundo: ¿por que lo dices?
+         -porque si: ok
+         -no quiero responder: ok
+      -no es la gran cosa: no sabes lo que estas diciendo
