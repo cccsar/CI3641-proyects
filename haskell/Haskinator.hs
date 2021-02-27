@@ -1,9 +1,9 @@
 module Main (main) where
 
--- Local imports 
+-- Imports locales 
 import Oraculo
 
--- Haskell imports
+-- Imports de haskell
 import qualified Text.Read  as R (readMaybe)
 import qualified Data.Map   as M (toList, keys, fromList, lookup, Map, insert)
 import qualified Data.Maybe as MB(fromJust)
@@ -15,7 +15,7 @@ import Control.Monad(unless)
 main = client sampleOraculo
 
 
-{- Helper functions -}
+{- funciones auxiliares -}
 
 client :: Oraculo -> IO ()
 client or = do
@@ -25,19 +25,19 @@ client or = do
   let f = MB.fromJust . M.lookup opt $ nameToFunc
 
   unless (opt==exit) $ f or >>= client
-  
+
   where
     functions :: M.Map String (Oraculo -> IO  Oraculo)
     functions = M.fromList [("predecir", predict)]
 
 
-{----------- Main Functions -----------}
+{----------- Funciones principales -----------}
 
--- Prediction function as described in the pdf 
+-- Función de predicción como fue descrita en el pdf 
 predict :: Oraculo -> IO Oraculo
 predict q@Pregunta{pregunta = p, opciones = opts} = do
-  let oraculoOpts = M.keys opts             -- oraculo options
-  let userOpts = oraculoOpts ++ [noOption]  -- all options (including no option at all)
+  let oraculoOpts = M.keys opts             -- opciones del oraculo
+  let userOpts = oraculoOpts ++ [noOption]  -- Todas las opciones, incluyendo "ninguna"
 
   -- prompt for an answer
   putStrLn $ '¿':p ++ "?"
@@ -65,38 +65,38 @@ predict q@Pregunta{pregunta = p, opciones = opts} = do
       let newOpts = M.insert option (Prediccion answer) opts
 
       return q{opciones=newOpts}
-    
+
 
 predict prd@(Prediccion p) = do
-  -- print prediction
+  -- Imprimir predicción
   putStrLn $ predictionStr p
   let opts = [yes,no]
   selection <- askOptions opts
 
   if selection == yes
-    then return prd -- If we win, keep the same oraculo 
+    then return prd -- Si ganamos, el oraculo se mantiene
     else putStrLn failMessage >> askNewQuestion
   where
     askNewQuestion :: IO Oraculo
     askNewQuestion = do
-      -- Ask for the correct answer
+      -- solicita la respuesta correcta
       actualAns <- getInLine askForExpectedAnswer
 
-      -- ask a question such that its answer would lead to the actual answer
+      -- Solicita una pregunta suya respuesta nos llevaría a la verdadera respuesta
       importantQuestion <- getInLine askForImportatQuestion
 
-      -- ask an option that should lead to the answer
+      -- Solicita una opción que debería llevarnos a la respuesta correcta
       newOption <- getInLine askOption
 
-      -- ask an option that should lead to our current answer
+      -- Solicita una opción que debería llevarnos a nuestra respuesta actual
       newOptionForOldAns <- getInLine . askOptionForInvalidAns $ p
 
       return $ ramificar [newOptionForOldAns, newOption] [prd, Prediccion actualAns] importantQuestion
 
 
--- create a new oraculo from a given prediction.
+-- Crea un oraculo nuevo desde una prediccion dada.
 create :: Oraculo -> IO Oraculo
-create _ = do 
+create _ = do
   -- get a new prediction
   prd <- getInLine askForNewPrediction
 
@@ -112,44 +112,44 @@ importantQuestion sybil = do
   first  <- getInLine' "Primer String: "
   second <- getInLine' "Segundo String: "
 
-  let out = lcaOraculo first second sybil 
+  let out = lcaOraculo first second sybil
 
-  case out of 
+  case out of
     Nothing -> do
-     putLine "Consulta invalida. Debe ingresar dos strings que representen predicciones en el oraculo" 
+     putLine "Consulta invalida. Debe ingresar dos strings que representen predicciones en el oraculo"
      return sybil
-    Just x  -> do 
+    Just x  -> do
      putLine $ "La pregunta que lleva a las predicciones: "++"\""++first++"\" y \""++second++"\" es:"
      putStrLn ("\t\t"++x)
      return sybil
 
 
 --Guarda una representacion textual del oraculo a un archivo.
-persist :: Oraculo -> IO Oraculo 
-persist sybil = do 
-  name <- getInLine "Dame un nombre de archivo para guardar al oraculo: " 
+persist :: Oraculo -> IO Oraculo
+persist sybil = do
+  name <- getInLine "Dame un nombre de archivo para guardar al oraculo: "
 
-  writeFile name (show sybil++"\n") 
+  writeFile name (show sybil++"\n")
 
-  return sybil 
- 
+  return sybil
+
 
 --Carga de un archivo una representacion textual de un oraculo.
-load :: Oraculo -> IO Oraculo 
-load sybil = do 
-  name <- getInLine "Dame un nombre de archivo de donde cargar el oraculo" 
+load :: Oraculo -> IO Oraculo
+load sybil = do
+  name <- getInLine "Dame un nombre de archivo de donde cargar el oraculo"
 
   cond <- doesFileExist name
 
-  if cond then do  
-    content <- readFile name 
+  if cond then do
+    content <- readFile name
     return (read content)
-  else do 
-    putLine "El nombre de archivo proporcionado no corresponde a un archivo existente." 
+  else do
+    putLine "El nombre de archivo proporcionado no corresponde a un archivo existente."
     return sybil
 
 
-{----------- Utils -----------}
+{----------- Utilidades -----------}
 
 -- Permite mostrar un string y solicitar input en la misma linea
 getInLine :: String -> IO String
@@ -163,20 +163,19 @@ getInLine ss = do
 
 -- Similar a la funcion anterior pero sin el prompt de haskinator
 getInLine' :: String -> IO String
-getInLine' ss = do 
+getInLine' ss = do
   putStr ss
   hFlush stdout
-  inp <- getLine
-  return inp 
+  getLine
 
 
--- Print a Haskinator message
-putLine :: String -> IO () 
-putLine ss =  putStrLn (prompt ++ (' ':ss)) 
+-- Imprime un mensaje de haskinator
+putLine :: String -> IO ()
+putLine ss =  putStrLn (prompt ++ (' ':ss))
 
 
--- show a list of options and return the selected option by asking for a
--- number 
+-- Muestra una lista de opciones, esperando recibir un número correspondiente
+-- a la opción
 askOptions :: [String] -> IO String
 askOptions opts =
   do
@@ -216,23 +215,23 @@ prettyOptions (Pregunta s opts) = do
 -- Calcula el lca para dos strings correspondientes a dos predicciones
 -- en un oraculo.
 lcaOraculo :: String -> String -> Oraculo -> Maybe String
-lcaOraculo firstS secondS o = 
-   case result of 
-     [a,b] -> Just (fst . last . takeWhile (\(a,b) -> a == b) . zip (reverse a) $ (reverse b))
+lcaOraculo firstS secondS o =
+   case result of
+     [a,b] -> Just (fst . last . takeWhile (uncurry (==)) . zip (reverse a) $ reverse b)
      _     -> Nothing
  where
-  result = lookupT [] firstS secondS o 
+  result = lookupT [] firstS secondS o
 
   -- lookupT :: [String] -> String -> String -> Oraculo -> [[String]]
   lookupT path a b (Prediccion s)
-    | a == s || b == s = [ s:path ] 
-    | otherwise        = [] 
-  lookupT path a b (Pregunta s mp) 
-    | a == s || b == s = [ s:path ] 
-    | otherwise        = concatMap (lookupT (s:path) a b) (map snd . M.toList $ mp) 
+    | a == s || b == s = [ s:path ]
+    | otherwise        = []
+  lookupT path a b (Pregunta s mp)
+    | a == s || b == s = [ s:path ]
+    | otherwise        = concatMap (lookupT (s : path) a b . snd) (M.toList mp)
 
 
-{----------- Constants -----------}
+{----------- Constantes y strings -----------}
 
 nameToFunc :: M.Map String (Oraculo -> IO Oraculo)
 nameToFunc = M.fromList [
@@ -267,7 +266,7 @@ optionOutOfRange = "Esa no es una opción válida. Intenta de nuevo"
 prompt :: String
 prompt = "Haskinator>"
 
--- No option literal
+-- Literal "ninguna opcion"
 noOption :: String
 noOption = "Ninguna"
 
@@ -287,21 +286,21 @@ askForExpectedOption = "¿Qué opción esperabas?"
 askForExpectedAnswer :: String
 askForExpectedAnswer = "¿En qué estabas pensando?"
 
--- Winning and losing prompts
+-- Mensajes de ganar y perder
 winMessage :: String
 winMessage = "Lo sabia, no eres rival para mis poderes"
 
 failMessage :: String
 failMessage = "Parece que has logrado superar mis poderes."
 
--- Asking for information when you fail a prediction
+-- Solicita informacion cuando se falla una predicción
 askForImportatQuestion :: String
 askForImportatQuestion = "¿Qué pregunta me habría llevado a esa respuesta?"
 
-askOption :: String 
+askOption :: String
 askOption = "¿Qué opción me llevaría a esa respuesta?"
 
-askOptionForInvalidAns :: String -> String 
+askOptionForInvalidAns :: String -> String
 askOptionForInvalidAns s = "¿Qué opción me debería llevar a '" ++ s ++ "'?"
 
 -- Solicitar una prediccion para crear oraculo nuevo
@@ -310,4 +309,4 @@ askForNewPrediction = "Dame una predicción, lo primero que se te ocurra"
 
 -- Pregunta de rutina en dialogo repetitivo
 preface :: String
-preface = " Dime, ¿qué deseas hacer?" 
+preface = " Dime, ¿qué deseas hacer?"

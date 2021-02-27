@@ -29,7 +29,7 @@ instance Read Oraculo where
 
 {- Construccion -} 
 
--- Creates an oracle from a String prediction
+-- Crea un oraculo desde un string de prediccion
 crearOraculo :: String -> Oraculo
 crearOraculo = Prediccion
 
@@ -43,7 +43,7 @@ respuesta _                _ = error "respuesta: invalid value constructor."
 
 {- Modificacion -}
 
--- creates an answer 
+-- Crea una respuesta 
 ramificar :: [String] -> [Oraculo] -> String -> Oraculo
 ramificar opc ors preg = Pregunta preg opcs
     where opcs = M.fromList $ zip opc ors
