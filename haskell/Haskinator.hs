@@ -4,19 +4,19 @@ module Main (main) where
 import Oraculo
 
 -- Haskell imports
-import Data.Char (toLower)
 import qualified Text.Read  as R (readMaybe)
 import qualified Data.Map   as M (toList, keys, fromList, lookup, Map, insert)
 import qualified Data.Maybe as MB(fromJust)
 import System.Directory (doesFileExist)
 import System.IO (hFlush, stdout, stderr, hPutStrLn )
-import System.Exit
 import Control.Monad(unless)
 
 
 main = client (Prediccion "42")
 
+
 {- Helper functions -}
+
 client :: Oraculo -> IO ()
 client or = do
   putStrLn introduction
@@ -30,6 +30,7 @@ client or = do
     functions :: M.Map String (Oraculo -> IO  Oraculo)
     functions = M.fromList [("predecir", predict)]
 
+
 {----------- Main Functions -----------}
 
 -- Prediction function as described in the pdf 
@@ -39,7 +40,7 @@ predict q@Pregunta{pregunta = p, opciones = opts} = do
   let userOpts = oraculoOpts ++ [noOption]  -- all options (including no option at all)
 
   -- prompt for an answer
-  putStrLn p
+  putStrLn $ '¿':p ++ "?"
   opt <- askOptions userOpts
 
   if opt == noOption
@@ -92,6 +93,7 @@ predict prd@(Prediccion p) = do
 
       return $ ramificar [newOptionForOldAns, newOption] [prd, Prediccion actualAns] importantQuestion
 
+
 -- create a new oraculo from a given prediction.
 create :: Oraculo -> IO Oraculo
 create _ = do 
@@ -116,7 +118,8 @@ importantQuestion sybil = do
     putStrLn ("\t\t"++x)
     return sybil
 
---Funciones relacionadas con manejo de archivos
+
+--Guarda una representacion textual del oraculo a un archivo.
 persist :: Oraculo -> IO Oraculo 
 persist sybil = do 
   name <- getInLine "Dame un nombre de archivo para guardar al oraculo: " 
@@ -126,6 +129,7 @@ persist sybil = do
   return sybil 
  
 
+--Carga de un archivo una representacion textual de un oraculo.
 load :: Oraculo -> IO Oraculo 
 load sybil = do 
   name <- getInLine "Dame un nombre de archivo de donde cargar el oraculo" 
@@ -139,7 +143,9 @@ load sybil = do
     putLine "El nombre de archivo proporcionado no corresponde a un archivo existente." 
     return sybil
 
+
 {----------- Utils -----------}
+
 -- Permite mostrar un string y solicitar input en la misma linea
 getInLine :: String -> IO String
 getInLine ss = do
@@ -149,6 +155,7 @@ getInLine ss = do
   inp <- getLine
   hFlush stdout
   return inp
+
 
 -- Print a Haskinator message
 putLine :: String -> IO () 
@@ -193,21 +200,6 @@ prettyOptions (Pregunta s opts) = do
         (M.keys opts)
 
 
--- Limpia la pantalla
-clearScreen :: IO ()
-clearScreen = putStr "\ESC[2J"
-
-
--- Se mueve a una posicion en la pantalla
-goTo :: (Int,Int) -> IO ()
-goTo (x, y) = putStr ("\ESC[" ++ show y ++ ";" ++ show x ++ "H")
-
-
--- Limpia la pantalla y reajusta la posicion del prompt
-begin :: IO ()
-begin = clearScreen >> goTo (0,0) 
-
-
 -- Calcula el lca para dos strings correspondientes a dos predicciones
 -- en un oraculo.
 lcaOraculo :: String -> String -> Oraculo -> Maybe String
@@ -234,7 +226,8 @@ nameToFunc = M.fromList [
     ("Predecir", predict),
     ("Crear", create),
     ("Cargar", load),
-    ("Persistir", persist)
+    ("Persistir", persist),
+    ("Pregunta crucial", importantQuestion)
   ]
 
 names = M.keys nameToFunc

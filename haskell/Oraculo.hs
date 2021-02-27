@@ -88,7 +88,8 @@ text, qP, optionP :: ReadP String
 text = many1 valid
 
 -- Parser para preguntas (temporal)
-qP  = between (openingQM >> skipSpaces) (skipSpaces >> closingQM) text
+qP  = between ying yang text
+ where ying = many1 openingQM >> skipSpaces ; yang = skipSpaces >> many1 closingQM 
 
 optionP = between dashP colonP text -- tentative
  where dashP   = char '-' >> skipSpaces ; colonP  = skipSpaces >> char ':'
@@ -127,6 +128,8 @@ mapP n = M.fromList <$> many1 mapBody
 oracleP n = choice [ questionP n , predictionP n] 
 
 
+runParser :: Show a => ReadP a -> String -> [(a,String)] 
+runParser xd ss = (readP_to_S xd) ss  
 
 {- Casos de prueba -} 
 
@@ -142,7 +145,7 @@ sampleText = "¿Eres venezolano?\n"++
              "      -no es la gran cosa: no sabes lo que estas diciendo\n"
 
 -- Test basico para imprimir (NO BORRAR)
-sampleOraculo = Pregunta { pregunta = "Eres hombre " ,
+sampleOraculo = Pregunta { pregunta = "Eres hombre" ,
                    opciones = M.fromList [ ("Si", Pregunta { pregunta="Te gusta el pan",
                      opciones=M.fromList [ ("Si", Prediccion {prediccion="gordo"}),
                        ("No", Prediccion "sano") ] } ),
