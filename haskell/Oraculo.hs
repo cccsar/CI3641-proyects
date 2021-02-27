@@ -129,9 +129,6 @@ mapP n = M.fromList <$> many1 mapBody
 oracleP n = choice [ questionP n , predictionP n] 
 
 
-runParser :: Show a => ReadP a -> String -> [(a,String)] 
-runParser xd ss = (readP_to_S xd) ss  
-
 {- Casos de prueba -} 
 
 -- Test basico para leer
