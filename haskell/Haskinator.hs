@@ -158,14 +158,6 @@ load sybil = do
       putLine "No pude leer un oraculo de ese archivo" >> return sybil
     Just f -> return f
 
-  --if cond then do
-  --  content <- readFile name
-  --  return (read content)
-  --else do
-  --  putLine "El nombre de archivo proporcionado no corresponde a un archivo existente."
-  --  return sybil
-
-
 {----------- Utilidades -----------}
 
 -- Permite mostrar un string y solicitar input en la misma linea
