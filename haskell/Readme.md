@@ -29,12 +29,14 @@ cualquier conjunto de caracteres distinto de '\n'.
 
 Por ejemplo: 
 
-`¿El actor interpretó un villano?`
-`   -sí: ¿Cuál es el nombre del villano?`
-`      -Joker: ¿De qué película es el Joker?`
-`         - Suicide Squad: Jared Leto`
-`         - The Dark Knight: Heath Ledger`
-`      -Bane: Tom Hardy`
-`      -Scarecrow: Cilian Murphy`
-`   -no: Christian Bale`
-  `
+```
+¿El actor interpretó un villano? 
+   -sí: ¿Cuál es el nombre del villano?  
+      -Joker: ¿De qué película es el Joker?  
+         - Suicide Squad: Jared Leto  
+         - The Dark Knight: Heath Ledger  
+      -Bane: Tom Hardy  
+      -Scarecrow: Cilian Murphy    
+   -no: Christian Bale
+```
+  
