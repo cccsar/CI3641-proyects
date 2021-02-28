@@ -2,9 +2,7 @@ module Oraculo (
   Oraculo (..) , 
   crearOraculo, 
   respuesta, 
-  ramificar,
-  sampleOraculo,
-  sampleText
+  ramificar
 ) where
 
 
@@ -77,23 +75,32 @@ openingQM,closingQM :: ReadP Char
 openingQM = char '¿'
 closingQM = char '?' 
 
--- Parser para caracteres validos
+-- Parser para texto sobre una linea valido
 valid :: ReadP Char
-valid = satisfy isQM 
- where  isQM c = c /= '?' && c /= '¿' && c /= '-' && c /= ':' && c /= '\n'
+valid = satisfy (/='\n')
 
 
-text, qP, optionP :: ReadP String
+text, qP, optionP, qText, oText :: ReadP String
 
 -- Parser para texto valido
 text = many1 valid
 
--- Parser para preguntas (temporal)
-qP  = between ying yang text
- where ying = many1 openingQM >> skipSpaces ; yang = skipSpaces >> many1 closingQM 
+-- Texto legible para las preguntas
+qText  = many1 validQText 
+ where validQText = satisfy  (/='?')
 
-optionP = between dashP colonP text -- tentative
- where dashP   = char '-' >> skipSpaces ; colonP  = skipSpaces >> char ':'
+-- texto legible para las opciones
+oText = many1 validOText 
+ where validOText = satisfy (/= ':') 
+
+-- Parser para preguntas 
+qP  = between ying yang qText
+ where ying = many1 openingQM >> skipSpaces ; yang = many1 closingQM 
+
+
+-- Parseo para opciones
+optionP = between dashP colonP oText
+ where dashP   = char '-' >> skipSpaces ; colonP  =  char ':'
 
 
 {- Parsers para el tipo de datos en cuestion -}
@@ -127,27 +134,3 @@ mapP n = M.fromList <$> many1 mapBody
 
 -- Parsea el tipo de datos Oraculo, a saber o una pregunta, o una prediccion
 oracleP n = choice [ questionP n , predictionP n] 
-
-
-{- Casos de prueba -} 
-
--- Test basico para leer
-sampleText = "¿Eres venezolano?\n"++
-             "   -si: ¿eres mayor de edad?\n"++
-             "      -si: mal por ti\n"++
-             "      -no: aun hay esperanza, huye\n"++
-             "   -no: ¿que se siente comer bien?\n"++
-             "      -es lo mejor del mundo: ¿por que lo dices?\n"++
-             "         -porque si: ok\n"++
-             "         -no quiero responder: ok\n"++
-             "      -no es la gran cosa: no sabes lo que estas diciendo\n"
-
--- Test basico para imprimir (NO BORRAR)
-sampleOraculo = Pregunta { pregunta = "Eres hombre" ,
-                   opciones = M.fromList [ ("Si", Pregunta { pregunta="Te gusta el pan",
-                     opciones=M.fromList [ ("Si", Prediccion {prediccion="gordo"}),
-                       ("No", Prediccion "sano") ] } ),
-                   ("No", Pregunta { pregunta = "Eres veneco",
-                       opciones=M.fromList [ ("Si", Prediccion "tu futuro es incierto"),  
-                     ("No", Prediccion "Bendecida y afortunada") ] }) ]
-                  }

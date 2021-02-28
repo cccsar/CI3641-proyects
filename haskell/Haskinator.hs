@@ -38,7 +38,7 @@ initHsk = do
   oraculo <- loadFromFile firstOraculo
 
   case oraculo of
-    Nothing -> return sampleOraculo 
+    Nothing -> return (Prediccion "42") 
     Just o  -> return o
 
 {----------- Funciones principales -----------}
