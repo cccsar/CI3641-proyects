@@ -33,6 +33,9 @@ client or = do
     functions :: M.Map String (Oraculo -> IO  Oraculo)
     functions = M.fromList [("predecir", predict)]
 
+
+-- Actua como un punto de entrada para la ejecucion, seleccionando un oraculo del archivo
+-- firstOraculo o tomando uno por defecto.
 initHsk :: IO Oraculo
 initHsk = do
   oraculo <- loadFromFile firstOraculo
