@@ -7,7 +7,7 @@
 
 ## Importante
 
-El texto reconocible por haskinator tiene el siguiente formato: 
+El texto reconocible por haskinator en sus archivos de entrada tiene el siguiente formato: 
 
 * preguntas:
 
@@ -25,8 +25,10 @@ en donde texto es cualquiero conjunto de caracteres distinto de ':'.
 
 >    texto
 
-cualquier conjunto de caracteres distinto de '\n'.
-
+cualquier conjunto de caracteres distinto de '\n'.  
+  
+**Toda línea debe acabar en un salto de línea.**  
+  
 Por ejemplo: 
 
 ```
