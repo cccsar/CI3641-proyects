@@ -7,7 +7,7 @@
 
 ## Importante
 
-El texto reconocible por haskinator tiene el siguiente formato: 
+El texto reconocible por haskinator en sus archivos de entrada tiene el siguiente formato: 
 
 * preguntas:
 
@@ -25,16 +25,21 @@ en donde texto es cualquiero conjunto de caracteres distinto de ':'.
 
 >    texto
 
-cualquier conjunto de caracteres distinto de '\n'.
-
+cualquier conjunto de caracteres distinto de '\n'.  
+  
+**Toda línea debe acabar en un salto de línea.**  
+  
 Por ejemplo: 
 
-`¿El actor interpretó un villano?`
-`   -sí: ¿Cuál es el nombre del villano?`
-`      -Joker: ¿De qué película es el Joker?`
-`         - Suicide Squad: Jared Leto`
-`         - The Dark Knight: Heath Ledger`
-`      -Bane: Tom Hardy`
-`      -Scarecrow: Cilian Murphy`
-`   -no: Christian Bale`
-  `
+```
+¿El actor interpretó un villano?
+   -sí: ¿Cuál es el nombre del villano?
+      -Joker: ¿De qué película es el Joker?
+         - Suicide Squad: Jared Leto
+         - The Dark Knight: Heath Ledger
+      -Bane: Tom Hardy
+      -Scarecrow: Cilian Murphy
+   -no: Christian Bale
+   
+```
+  
