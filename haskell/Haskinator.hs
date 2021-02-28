@@ -12,11 +12,14 @@ import System.IO (hFlush, stdout, stderr, hPutStrLn )
 import Control.Monad(unless)
 
 
-main = client sampleOraculo
+-- inicializa un oraculo arbitrario e inicia el cliente con él
+main = initHsk >>= client
 
 
 {- funciones auxiliares -}
 
+-- Parsea el input de usuario constantemente y ejecuta 
+-- las acciones que se le soliciten
 client :: Oraculo -> IO ()
 client or = do
   putStrLn introduction
@@ -30,6 +33,13 @@ client or = do
     functions :: M.Map String (Oraculo -> IO  Oraculo)
     functions = M.fromList [("predecir", predict)]
 
+initHsk :: IO Oraculo
+initHsk = do
+  oraculo <- loadFromFile firstOraculo
+
+  case oraculo of
+    Nothing -> return sampleOraculo 
+    Just o  -> return o
 
 {----------- Funciones principales -----------}
 
@@ -139,14 +149,18 @@ load :: Oraculo -> IO Oraculo
 load sybil = do
   name <- getInLine "Dame un nombre de archivo de donde cargar el oraculo"
 
-  cond <- doesFileExist name
+  content <- loadFromFile name
+  case content of
+    Nothing -> do
+      putLine "No pude leer un oraculo de ese archivo" >> return sybil
+    Just f -> return f
 
-  if cond then do
-    content <- readFile name
-    return (read content)
-  else do
-    putLine "El nombre de archivo proporcionado no corresponde a un archivo existente."
-    return sybil
+  --if cond then do
+  --  content <- readFile name
+  --  return (read content)
+  --else do
+  --  putLine "El nombre de archivo proporcionado no corresponde a un archivo existente."
+  --  return sybil
 
 
 {----------- Utilidades -----------}
@@ -231,6 +245,15 @@ lcaOraculo firstS secondS o =
     | otherwise        = concatMap (lookupT (s : path) a b . snd) (M.toList mp)
 
 
+loadFromFile :: String -> IO (Maybe Oraculo)
+loadFromFile f = do
+  cond <- doesFileExist f
+
+  if cond then do
+    content <- readFile f
+    return (R.readMaybe content)
+  else return Nothing 
+
 {----------- Constantes y strings -----------}
 
 nameToFunc :: M.Map String (Oraculo -> IO Oraculo)
@@ -245,6 +268,11 @@ nameToFunc = M.fromList [
 names = M.keys nameToFunc
 
 exit = "salir"
+
+-- Oraculo inicial
+firstOraculo :: String 
+firstOraculo = "p1.txt"
+
 -- String de presentacion
 introduction :: String
 introduction = " Bienvenido a mi humilde morada viajero!\n ¿Estas listo para presenciar las increibles"++
