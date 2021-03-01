@@ -224,12 +224,12 @@ prettyOptions (Pregunta s opts) = do
 -- Calcula el lca para dos strings correspondientes a dos predicciones
 -- en un oraculo.
 lcaOraculo :: String -> String -> Oraculo -> Maybe String
-lcaOraculo firstS secondS o =
+lcaOraculo firstS secondS sybil =
    case result of
      [a,b] -> Just (fst . last . takeWhile (uncurry (==)) . zip (reverse a) $ reverse b)
      _     -> Nothing
  where
-  result = lookupT [] firstS secondS o
+  result = lookupT [] firstS secondS sybil
 
   -- lookupT :: [String] -> String -> String -> Oraculo -> [[String]]
   lookupT path a b (Prediccion s)
