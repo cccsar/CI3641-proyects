@@ -130,11 +130,11 @@ importantQuestion sybil = do
   case out of
     Nothing -> do
      putLine "Consulta invalida. Debe ingresar dos strings que representen predicciones en el oraculo"
-     return sybil
     Just x  -> do
      putLine $ "La pregunta que lleva a las predicciones: "++"\""++first++"\" y \""++second++"\" es:"
      putStrLn ("\t\t"++x)
-     return sybil
+
+  return sybil
 
 
 --Guarda una representacion textual del oraculo a un archivo.
