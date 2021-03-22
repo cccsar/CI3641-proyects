@@ -13,7 +13,7 @@ El texto reconocible por haskinator en sus archivos de entrada tiene el siguient
 
 >    ¿text?
 
-en donde text es cualquier conjunto de caracteres distinto de ?, pues en tal caso, se interpretaria lo que sigue como una pregunta
+en donde text es cualquier conjunto de caracteres distinto de ?, pues en tal caso, se interpretaria lo que sigue como una pregunta.
 
 * opciones:
 

@@ -75,15 +75,12 @@ openingQM,closingQM :: ReadP Char
 openingQM = char '¿'
 closingQM = char '?' 
 
--- Parser para texto sobre una linea valido
-valid :: ReadP Char
-valid = satisfy (/='\n')
-
-
+-- Parsers para strings particulares
 text, qP, optionP, qText, oText :: ReadP String
 
 -- Parser para texto valido
 text = many1 valid
+ where valid = satisfy (/='\n')
 
 -- Texto legible para las preguntas
 qText  = many1 validQText 
