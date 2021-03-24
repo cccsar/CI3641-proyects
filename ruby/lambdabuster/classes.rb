@@ -1,3 +1,5 @@
+require 'date'
+
 class SearchList
 
     # Cannot modify, just get
@@ -13,7 +15,6 @@ class SearchList
 
     # Add one element
     def <<(elem)
-        raise NotImplementedError
         @list<< elem
         self
     end
@@ -32,6 +33,17 @@ class SearchList
         raise NotImplementedError
         @list.each(* args , &block )
     end
+
+    # Scan this searchlist looking for 
+    # properties that match
+    def scan (atom, &block)
+      begin
+        newlist = @list.filter {|x| block.call(x.send(atom))}
+        return SearchList.new(*newlist)
+      rescue NoMethodError
+          puts "Ese atomo no existe"
+      end
+    end
 end
 
 
@@ -45,6 +57,9 @@ class Person
     @nationality = nationality
   end
 
+  def to_s 
+    @name
+  end
 end
 
 class Actor < Person
@@ -76,17 +91,46 @@ end #como garantizo que esxista la instancia de Persona con los atributos que se
 class Movie
   attr_reader :name, :runtime, :categories, :release_date, :directors, :actors, :price, :rent_price
 
-  def initialize(name, runtime, categories = [], release_date, directors, actors, price, rent_price)
+  def initialize( name = "", 
+            runtime = 0, 
+            categories = [], 
+            release_date = Date.today, 
+            directors = SearchList.new(), 
+            actors = SearchList.new(), 
+            price = 0.0, 
+            rent_price = 0.0 )
+            
     @name = name
     @runtime = runtime
     @release_date = release_date
-    @directors = SearchList.new()
-    @actors = SearchList.new()
+    @directors = directors
+    @actors = directors
     @price = price
     @rent_pric = rent_price
+    @categories = categories
   end # como garantizo que se incluya la pelicula en starred_in o directed de actor y director respectivamente?
   
   def to_s 
+    hours = @runtime / 60
+    mins  = @runtime % 60 
+    
+    # build category string
+    if @categories.length == 1
+      categories = @categories[0]
+    elsif @categories.empty?
+      categories = "No genres available"
+    else
+      categories = @categories[0..@categories.length - 2].join(", ") # everything but the last
+      categories += " and #{@categories.last}"
+    end
+
+    # Build line by line with string interpolation
+    l1 = "#{@name} (#{@release_date}) - Hours #{hours} Mins #{mins}\n"
+    l2 = "Genres: #{categories}\n"
+    l3 = "Directed by: #{@directors}\n"
+    l4 = "Cast: #{@actors}"
+
+    return l1 + l2 + l3 + l4
   end
 
 end
@@ -134,29 +178,29 @@ end
 
 #######################################3
 
-class Transaction
+#class Transaction
+#
+#  include BuyOrder
+#  include RentOrder
+#
+#  attr_reader :movie, :type, :total, :date
+#
+#  def initialize (movie, type) 
+#    @movie = movie
+#    @type = type
+#  end
+#
+#end
 
-  include BuyOrder
-  include RentOrder
-
-  attr_reader :movie, :type, :total, :date
-
-  def initialize (movie, type) 
-    @movie = movie
-    @type = type
-  end
-
-end
-
-module BuyOrder
-  def buy_order
-  end
-end
-
-module RentOrder
-  def rent_order
-  end
-end
+#module BuyOrder
+#  def buy_order
+#  end
+#end
+#
+#module RentOrder
+#  def rent_order
+#  end
+#end
 
 
 #######################################3
