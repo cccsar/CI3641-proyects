@@ -275,7 +275,7 @@ class Integer
   end
 
   def bolivares
-    Euro.new(self)
+    Bolivar.new(self)
   end
 
   def bitcoins
@@ -320,6 +320,9 @@ class Currency
     #  value in dolars
     in_dolars = self.to_dolar
     
+
+    puts "value in dolar: #{in_dolars}"
+
     # Convert anything 
     target.from_dolar(in_dolars)
   end
@@ -345,6 +348,7 @@ class Currency
     else
       return :greater
     end
+    
   end
 end
 
@@ -352,18 +356,6 @@ class Dolar < Currency
 
   def to_s
     "#{@value} $"
-  end
-
-  def to_bs
-    Bolivar.new(@value * 1825348.00)  # may wildly change depending on when you run this program
-  end
-
-  def to_euro
-    Euro.new(@value * 0.85)
-  end
-
-  def to_btc
-    Bitcoin.new(@value * 0.000019) 
   end
 
   def to_dolar
@@ -401,7 +393,7 @@ class Bolivar < Currency
   end
 
   def to_dolar
-    Dolar.new(dolars.value / 1825348.0)
+    Dolar.new(@value / 1825348.0)
   end   
 end
 
@@ -424,29 +416,29 @@ end
 
 #######################################3
 
-#class Transaction
-#
-#  include BuyOrder
-#  include RentOrder
-#
-#  attr_reader :movie, :type, :total, :date
-#
-#  def initialize (movie, type) 
-#    @movie = movie
-#    @type = type
-#  end
-#
-#end
+class Transaction
 
-#module BuyOrder
-#  def buy_order
-#  end
-#end
-#
-#module RentOrder
-#  def rent_order
-#  end
-#end
+  include BuyOrder
+  include RentOrder
+
+  attr_reader :movie, :type, :total, :date
+
+  def initialize (movie, type) 
+    @movie = movie
+    @type = type
+  end
+
+end
+
+module BuyOrder
+  def buy_order
+  end
+end
+
+module RentOrder
+  def rent_order
+  end
+end
 
 
 #######################################3
