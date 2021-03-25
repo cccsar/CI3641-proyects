@@ -306,46 +306,119 @@ class Currency
   attr_reader :value
   def initialize(value)
     @value = value + 0.0
+    @@CURRENCY_TYPES = {
+      :bolivar => Bolivar,
+      :dolar   => Dolar,
+      :euro    => Euro,
+      :bitcoin => Bitcoin
+    }
   end
 
   def in atom
+    #  currency we want to change to
+    target = @@CURRENCY_TYPES[atom]
+    #  value in dolars
+    in_dolars = self.to_dolar
+    
+    # Convert anything 
+    target.from_dolar(in_dolars)
+  end
+
+  # so we can convert to dolar and then to our desired corrency
+  def to_dolar
+    throw NotImplementedError
+  end
+
+  def self.from_dolar(dolars)
+    throw NotImplementedError
+  end
+
+  # comparing currencies
+  def compare(other)
+    self_value = self.to_dolar.value
+    other_value = other.to_dolar.value
+
+    if self_value < other_value
+      return :lesser
+    elsif self_value == other_value
+      return :equal
+    else
+      return :greater
+    end
   end
 end
 
 class Dolar < Currency
-  
+
+  def to_s
+    "#{@value} $"
+  end
+
   def to_bs
-    @value * 1825348.00  # may wildly change depending on when you run this program
+    Bolivar.new(@value * 1825348.00)  # may wildly change depending on when you run this program
   end
 
   def to_euro
-    @value * 0.85
+    Euro.new(@value * 0.85)
   end
 
   def to_btc
-    @value * 0.000019
+    Bitcoin.new(@value * 0.000019) 
   end
 
+  def to_dolar
+    Dolar.new(@value)
+  end 
+
+  def self.from_dolar(dolars)
+    Dolar.new(dolars.value)
+  end
 end
 
 class Euro < Currency
-  
 
-  
+  def to_s
+    "#{@value} €"
+  end
+
+  def self.from_dolar(dolars)
+    Euro.new(dolars.value / 1.18)
+  end
+
+  def to_dolar 
+    Dolar.new(@value * 1.18)
+  end
 end
 
 class Bolivar < Currency
 
-  def in atom
+  def to_s
+    "#{@value} Bs"
   end
 
-  def compare other
+  def self.from_dolar(dolars)
+    Bolivar.new(dolars.value * 1825348.0)
   end
+
+  def to_dolar
+    Dolar.new(dolars.value / 1825348.0)
+  end   
 end
 
 class Bitcoin < Currency
-  def in atom
+
+  def to_s
+    "#{@value} BTC"
   end
+
+  def self.from_dolar(dolars)
+    Bitcoin.new(dolars.value / 52.009)
+  end 
+
+  def to_dolar
+    Dolar.new(@value * 52.009)
+  end
+
 end
 
 
