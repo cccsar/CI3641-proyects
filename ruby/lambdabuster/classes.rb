@@ -51,6 +51,8 @@ end
 
 class Person
 
+  attr_reader :name, :birthday, :nationality
+  attr_writer :name
   def initialize (name,birthday,nationality) 
     @name = name
     @birthday = birthday
@@ -62,29 +64,59 @@ class Person
   end
 end
 
-class Actor < Person
+class Actor 
 
-  attr_reader :stareed_in
+  attr_reader :starred_in, :name, :birthday, :nationality
 
-  def initialize (name, birthday, nationality, starred_in = SearchList.new() ) 
-    @name = name
-    @birthday = birthday 
-    @nationality = nationality
+  def initialize (person, starred_in = SearchList.new() ) 
+    @person = person
     @starred_in = starred_in
   end
 
-end # como garantizo que exista la instancia de Persona con los atributos que se derivan?
+  def name
+    @person.name
+  end
 
+  def birthday
+    @person.birthday
+  end
 
-class Director < Person
-   def initialize (name, birthday, nationality, directed = SearchList.new() ) 
-    @name = name
-    @birthday = birthday 
-    @nationality = nationality
+  def nationality
+    @person.nationality
+  end
+
+  def starred_in
+    @person.starred_in
+  end
+
+end 
+
+class Director 
+
+  attr_reader :starred_in, :name, :birthday, :nationality
+
+  def initialize (person, directed = SearchList.new() ) 
+    @person = person
     @directed = directed
   end
-end #como garantizo que esxista la instancia de Persona con los atributos que se derivan?
 
+  def name
+    @person.name
+  end
+
+  def birthday
+    @person.birthday
+  end
+
+  def nationality
+    @person.nationality
+  end
+
+  def directed
+    @person.directed
+  end
+
+end 
 
 #######################################3
 
@@ -98,7 +130,8 @@ class Movie
             directors = SearchList.new(), 
             actors = SearchList.new(), 
             price = 0.0, 
-            rent_price = 0.0 )
+            rent_price = 0.0
+          )
             
     @name = name
     @runtime = runtime
@@ -106,7 +139,7 @@ class Movie
     @directors = directors
     @actors = directors
     @price = price
-    @rent_pric = rent_price
+    @rent_price = rent_price
     @categories = categories
   end # como garantizo que se incluya la pelicula en starred_in o directed de actor y director respectivamente?
   
@@ -137,28 +170,168 @@ end
 
 
 class Premiere
+
+  attr_reader :name, :runtime, :categories, :release_date, :directors, :actors, :price, :rent_price
+
+  def initialize(movie)
+    @movie = movie
+  end
+
+  def to_s
+    @movie.to_s 
+  end
+
+  def price 
+    @movie.price * 2
+  end
+
+  def name
+    @movie.name
+  end
+
+  def runtime
+    @movie.runtime
+  end
+
+  def categories
+    @movie.categories
+  end
+
+  def release_date
+    @movie.release_date
+  end
+
+  def directors
+    @movie.directors
+  end
+
+  def actors
+    @movie.actors
+  end
+
+  def rent_price
+    @movie.rent_price
+  end
+
 end
 
-class Discount 
+class Discount
+
+  attr_reader :name, :runtime, :categories, :release_date, :directors, :actors, :price, :rent_price
+
+  def initialize(movie, discount)
+    @movie = movie
+    @discount = discount
+  end
+
+  def to_s
+    @movie.to_s 
+  end
+
+  def price 
+    @movie.price - @discount
+  end
+
+  def name
+    @movie.name
+  end
+
+  def runtime
+    @movie.runtime
+  end
+
+  def categories
+    @movie.categories
+  end
+
+  def release_date
+    @movie.release_date
+  end
+
+  def directors
+    @movie.directors
+  end
+
+  def actors
+    @movie.actors
+  end
+
+  def rent_price
+    @movie.rent_price - @discount
+  end
 end
 
 
 #######################################3
 
-class Currency
-  def in atom
+# Transforming nums into currency
+class Integer
+  def dolars
+    Dolar.new(self)
   end
 
+  def euros
+    Euro.new(self)
+  end
+
+  def bolivares
+    Euro.new(self)
+  end
+
+  def bitcoins
+    Bitcoin.new(self)
+  end
+end
+
+class Float
+  def dolars
+    Dolar.new(self)
+  end
+
+  def euros
+    Euro.new(self)
+  end
+
+  def bolivares
+    Euro.new(self)
+  end
+
+  def bitcoins
+    Bitcoin.new(self)
+  end
+end
+
+class Currency
+
+  attr_reader :value
+  def initialize(value)
+    @value = value + 0.0
+  end
+
+  def in atom
+  end
 end
 
 class Dolar < Currency
-  def in atom
+  
+  def to_bs
+    @value * 1825348.00  # may wildly change depending on when you run this program
   end
+
+  def to_euro
+    @value * 0.85
+  end
+
+  def to_btc
+    @value * 0.000019
+  end
+
 end
 
 class Euro < Currency
-  def in atom
-  end
+  
+
+  
 end
 
 class Bolivar < Currency
