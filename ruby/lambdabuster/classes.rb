@@ -416,30 +416,44 @@ end
 
 #######################################3
 
+module BuyOrder
+  def buy_order
+    self.date = Date.today
+    self.total = self.movie.price
+  end
+end
+
+module RentOrder
+  def rent_order
+    self.date = Date.today
+    self.total = self.movie.rent_price
+  end
+end
+
 class Transaction
 
   include BuyOrder
   include RentOrder
 
   attr_reader :movie, :type, :total, :date
+  attr_writer :total, :date
 
   def initialize (movie, type) 
+    # store name and type
     @movie = movie
     @type = type
+
+    # check transaction type
+    if type == :buy
+      self.buy_order
+    elsif type == :rent
+      self.rent_order
+    else 
+      raise "Este no es un tipo válido de transacción: #{type}"
+    end
   end
 
 end
-
-module BuyOrder
-  def buy_order
-  end
-end
-
-module RentOrder
-  def rent_order
-  end
-end
-
 
 #######################################3
 
@@ -447,6 +461,9 @@ class User
   attr_reader :owned_movies, :rented_movies, :transactions
 
   def initialize (owned_movies = SearchList.new(), rented_movies= SearchList.new(), transactions= SearchList.new()) 
+    @owned_movies  = owned_movies
+    @rented_movies = rented_movies
+    @transactions  = transactions
   end
     
 end
