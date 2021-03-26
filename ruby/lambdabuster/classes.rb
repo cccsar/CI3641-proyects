@@ -1,4 +1,5 @@
 require 'date'
+require 'json'
 
 class SearchList
 
@@ -466,4 +467,64 @@ class User
     @transactions  = transactions
   end
     
+end
+
+########################################
+
+#Client
+
+
+while ( true ) 
+
+  puts "Ingrese el nombre de un archivo JSON correctamente formateado"
+  filename = gets.chomp
+
+  if (File.exist?(filename)) then
+
+    fObject = File.open(filename) 
+    fString = fObject.read 
+    fObject.close 
+
+    myJson = JSON.parse(fString)
+    break 
+  else
+    puts "No such a file named #{filename}"
+  end
+
+end
+
+puts myJson
+
+## helpers
+
+# asume json bien formateado
+def actorsDirectorsTraversal parsedJson 
+
+  topLevel = ["directors","actors"]
+  attributes = ["name","birthday","nationality"] 
+
+  for kind in topLevel
+   for subjects in parsedJson[kind] 
+       for at in attributes
+         print "#{subjects[at]} " 
+       end
+       print "\n" 
+   end
+  end
+
+end
+
+
+# asume json bien formateado
+def moviesTraversal parsedJson
+
+  atts = ["name","runtime","categories","release-date","actores","price","rent-price","premiere","discount"]
+
+  for movie in parsedJson["movies"] 
+    for att in atts
+        print "#{movie[att]} " 
+      print "\n" 
+    end
+  end
+
 end
