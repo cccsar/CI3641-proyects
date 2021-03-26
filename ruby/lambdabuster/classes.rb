@@ -473,6 +473,26 @@ end
 
 #Client
 
+class Client
+  attr_reader :known_persons, :known_actors, :known_directors, :movie_catalog, :existing_categories, :user
+  
+  def initialize (known_persons = Map.new(), 
+                  known_actors = Map.new(),
+                  known_directors = Map.new(),
+                  movie_catalog = SearchList.new(),
+                  existing_categories = Set.new(),
+                  user = User.new()
+                 ) 
+    @known_persons = known_persons # map of person by name 
+    @known_actors = known_actors # map of actors by name, coungrent with known persons
+    @known_directors = known_directors # map of directors by name, coungrent with known persons
+    @movie_catalog = movie_catalog #SearchList of movies
+    @existing_categories = existing_categories # set of movie categories
+    @user = user # a user
+  end
+
+end
+
 
 while ( true ) 
 
@@ -493,7 +513,9 @@ while ( true )
 
 end
 
+
 puts myJson
+
 
 ## helpers
 
