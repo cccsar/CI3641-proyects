@@ -67,6 +67,7 @@ end
 class Actor 
 
   attr_reader :starred_in, :name, :birthday, :nationality
+  attr_writer :starred_in
 
   def initialize (person, starred_in = SearchList.new() ) 
     @person = person
@@ -94,6 +95,7 @@ end
 class Director 
 
   attr_reader :starred_in, :name, :birthday, :nationality
+  attr_writer :starred_in
 
   def initialize (person, directed = SearchList.new() ) 
     @person = person
@@ -563,14 +565,15 @@ for movie_descriptor in myJson["movies"]
   thisMovie = Movie.new(name,runtime,categories,release_date, SearchList.new(dirs), SearchList.new(acts),price,rent_price)
 
   # For every actor and director relate it to the current movie by making it star or director
-  #dirs.each { |dir| dir.directed << thisMovie }  if !dirs.empty?
-  #acts.each { |act| act.starred_in << thisMovie } if !acts.empty?
+  dirs.each { |dir| dir.directed << thisMovie }  
+  acts.each { |act| act.starred_in << thisMovie }
 
   categories_set.merge(categories)  # update categories set with current categories
 
   movie_catalog<<thisMovie          # update movie catalog with current movie
 
 end
+
 
 puts "Persons information:" 
 persons_map.each do 
@@ -601,3 +604,6 @@ movie_catalog.each do
   puts "\tdirectors:" 
   puts "\t\t #{movie.directors}" 
 end
+
+puts "Categories"
+categories_set.each{ |cat| puts "\t#{cat}"} 
