@@ -31,7 +31,6 @@ class SearchList
     end
 
     def each (* args , &block )
-        raise NotImplementedError
         @list.each(* args , &block )
     end
 
@@ -86,8 +85,8 @@ class Actor
     @person.nationality
   end
 
-  def starred_in
-    @person.starred_in
+  def to_s 
+    @person.name
   end
 
 end 
@@ -113,10 +112,9 @@ class Director
     @person.nationality
   end
 
-  def directed
-    @person.directed
+  def to_s 
+    @person.name
   end
-
 end 
 
 #######################################3
@@ -126,7 +124,7 @@ class Movie
 
   def initialize( name = "", 
             runtime = 0, 
-            categories = [], 
+            categories = Set.new(), 
             release_date = Date.today, 
             directors = SearchList.new(), 
             actors = SearchList.new(), 
@@ -138,7 +136,7 @@ class Movie
     @runtime = runtime
     @release_date = release_date
     @directors = directors
-    @actors = directors
+    @actors = actors
     @price = price
     @rent_price = rent_price
     @categories = categories
@@ -496,7 +494,7 @@ end
 
 while ( true ) 
 
-  puts "Ingrese el nombre de un archivo JSON correctamente formateado"
+  print "Ingrese el nombre de un archivo JSON correctamente formateado: "
   filename = gets.chomp
 
   if (File.exist?(filename)) then
@@ -513,40 +511,93 @@ while ( true )
 
 end
 
+# Usefull definitions
 
-puts myJson
+persons_map = Hash.new() 
+actors_map = Hash.new()
+directors_map = Hash.new() 
+movie_catalog = SearchList.new()
+categories_set = Set.new()
 
 
-## helpers
 
-# asume json bien formateado
-def actorsDirectorsTraversal parsedJson 
+for actor_descriptor in myJson["actors"]  # Gather actors information
+  name        = actor_descriptor["name"]
+  birthday    = Date.parse ( actor_descriptor["birthday"]  )
+  nationality = actor_descriptor["nationality"]
 
-  topLevel = ["directors","actors"]
-  attributes = ["name","birthday","nationality"] 
+  thisPerson = Person.new(name, birthday, nationality)  
 
-  for kind in topLevel
-   for subjects in parsedJson[kind] 
-       for at in attributes
-         print "#{subjects[at]} " 
-       end
-       print "\n" 
-   end
-  end
+  persons_map[name] = thisPerson 
+  actors_map[name]  = Actor.new(thisPerson) 
+end
+
+for director_descriptor in myJson["directors"] # Gather directors information
+  name        = director_descriptor["name"]
+  birthday    = Date.parse( director_descriptor["birthday"]  )
+  nationality = director_descriptor["nationality"]
+
+  thisPerson = Person.new(name, birthday, nationality) 
+
+  persons_map[name]   = thisPerson if !persons_map.include?(name)
+  directors_map[name] = Director.new(thisPerson)
+end
+
+puts myJson["movies"]
+
+for movie_descriptor in myJson["movies"] 
+  name         = movie_descriptor["name"]
+  runtime      = movie_descriptor["runtime"]
+  categories   = Set.new( movie_descriptor["categories"] )
+  release_date = Date.parse( movie_descriptor["release-date"]  )
+
+  # Retrieve every Director and Actor object to place whithin current movie
+  dirs = movie_descriptor["directors"].map { |name| directors_map[name] }
+  acts = movie_descriptor["actors"].map { |name| actors_map[name] } 
+
+  price      = movie_descriptor["price"]
+  rent_price = movie_descriptor["rent_price"]
+  premiere   = movie_descriptor["premiere"]
+  discount   = movie_descriptor["discount"]
+
+  thisMovie = Movie.new(name,runtime,categories,release_date, SearchList.new(dirs), SearchList.new(acts),price,rent_price)
+
+  # For every actor and director relate it to the current movie by making it star or director
+  #dirs.each { |dir| dir.directed << thisMovie }  if !dirs.empty?
+  #acts.each { |act| act.starred_in << thisMovie } if !acts.empty?
+
+  categories_set.merge(categories)  # update categories set with current categories
+
+  movie_catalog<<thisMovie          # update movie catalog with current movie
 
 end
 
+puts "Persons information:" 
+persons_map.each do 
+  |_,person|
+  puts "\tname: #{person.name}, bday: #{person.birthday}, nat: #{person.nationality}"
+end
 
-# asume json bien formateado
-def moviesTraversal parsedJson
+puts "Actors information:" 
+actors_map.each do 
+  |_,actor|
+  puts "\tname: #{actor.name}, bday: #{actor.birthday}, nat: #{actor.nationality}"
+end
 
-  atts = ["name","runtime","categories","release-date","actores","price","rent-price","premiere","discount"]
+puts "Directors information:"
+directors_map.each do 
+  |_,director|
+  puts "\tname: #{director.name}, bday: #{director.birthday}, nat: #{director.nationality}"
+end
 
-  for movie in parsedJson["movies"] 
-    for att in atts
-        print "#{movie[att]} " 
-      print "\n" 
-    end
-  end
-
+puts "Movie catalog" 
+movie_catalog.each do 
+  |movie|
+  puts "\tname: #{movie.name}, runtime: #{movie.runtime}, price: #{movie.price}, rent_price: #{movie.rent_price}"
+  puts "\tcategories:"
+  movie.categories.each { |cat| puts "\t\t#{cat}" }
+  puts "\tactors:"
+  puts "\t\t #{movie.actors}" 
+  puts "\tdirectors:" 
+  puts "\t\t #{movie.directors}" 
 end
