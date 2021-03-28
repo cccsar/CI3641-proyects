@@ -126,11 +126,11 @@ class Client
         
         while (true) 
             puts "¿Qué desea hacer?\n"+
-                "1) Crear nueva orden de alquiler\n"+
-                "2) Crear nueva orden de compra\n"+
-                "3) Mi usuario\n"+
-                "4) Consultar catálogo\n"+
-                "5) Salir\n"
+                "\t1) Crear nueva orden de alquiler\n"+
+                "\t2) Crear nueva orden de compra\n"+
+                "\t3) Mi usuario\n"+
+                "\t4) Consultar catálogo\n"+
+                "\t5) Salir\n"
         
             choice = ask_input 
         
@@ -142,7 +142,7 @@ class Client
             when 3 
               check_user 
             when 4 
-              throw NotImplementedError
+              filtering
             when 5 
               puts "Hasta la proxima"
               break
@@ -166,9 +166,9 @@ class Client
             if search_result.nil? 
                 while ( true ) 
                   puts "La pelicula ingresada no existe. ¿Qué desea hacer?\n"+
-                      "1) Regresar\n"+
-                      "2) Consultar catálogo\n"+
-                      "3) Repetir consulta\n"
+                      "\t1) Regresar\n"+
+                      "\t2) Consultar catálogo\n"+
+                      "\t3) Repetir consulta\n"
                   choice = ask_input
               
                   case choice.to_i
@@ -192,11 +192,11 @@ class Client
                   while ( gd ) 
           
                     puts "Ingrese un metodo de pago. Disponibles:\n"+
-                        "1) Dolares\n"+
-                        "2) Bolivares\n"+
-                        "3) Euros\n"+
-                        "4) Bitcoins\n"+
-                        "5) Volver a menu principal" 
+                        "\t1) Dolares\n"+
+                        "\t2) Bolivares\n"+
+                        "\t3) Euros\n"+
+                        "\t4) Bitcoins\n"+
+                        "\t5) Volver a menu principal" 
             
                     choice = ask_input
                     actual_price = type ? search_result.rent_price.dolars : search_result.price.dolars
@@ -291,11 +291,9 @@ class Client
                 case choice.to_i
                 when 1
                     puts "información sobre actores:" 
-                    #puts found_mv.actors
                     found_mv.actors.list.each { |act| puts "\t #{act}" } 
                 when 2
                     puts "información sobre directores:"
-                    #puts found_mv.directors
                     found_mv.directors.list.each{ |act| puts "\t #{act}" } 
                 when 3
                     return
@@ -307,6 +305,151 @@ class Client
             end 
         end  
     end
+
+    def filtering
+
+
+      while ( true ) 
+        puts "Escoga una de las siguientes opciones:"
+
+        puts "\t1) Mostrar todas\n"+
+             "\t2) Filtrar\n" 
+  
+        case ask_input.chomp.to_i
+        when 1
+          # Mostrar todas las peliculas en el sistema y hacer break
+          for movie in @movie_catalog
+            puts movie
+          end
+
+          break 
+
+        when 2
+
+          filtered_movies = Set.new() # Set that maintains filtered movies at the moment
+
+          while ( true ) 
+
+            puts "Seleccione alguno de los siguientes filtros:"
+            puts "\t1) Nombre\n"+
+                 "\t2) Año\n"+ 
+                 "\t3) Nombre de director\n"+ 
+                 "\t4) Nombre de actor\n"+
+                 "\t5) Duración\n"+
+                 "\t6) Categorías\n"+
+                 "\t7) Precio de compra\n"+
+                 "\t8) Precio de alquiler\n"
+    
+            case ask_input.chomp.to_i
+            when 1
+              throw NotImplementedError
+            when 2
+              throw NotImplementedError
+            when 3
+              throw NotImplementedError
+            when 4
+              throw NotImplementedError
+            when 5
+              throw NotImplementedError
+            when 6
+              accum_cathegories = Set.new() 
+
+              finished = false
+              while ( true ) 
+                puts "Seleccione alguna de las siguientes categorias: " 
+
+                for cat in categories_set
+                  puts cat
+                end
+
+                req_cathegory = ask_input.chomp
+
+                if categories_set.include?( req_cathegory )  
+                  accum_cathegories.add( req_cathegory ) 
+
+                  puts "¿Desea añadir más filtros?"
+                  puts "\t1) Si\n\t2) No\n"
+
+                  while ( true ) 
+                    case ask_input.chomp.to_i
+                    when 1
+                      break  
+                    when 2 
+                      # Gather movies matching requested cathegories
+                      for cat in accum_cathegories
+                        matching_movies = movie_catalog.list.filter { |mv| mv.categories.include?( cat ) } 
+                        filtered_movies = filtered_movies | matching_movies
+                      end
+
+                      finished = true
+                      break
+                    else
+                      throw NotImplementedError
+                    end
+                  end
+
+                  break if finished
+
+                else
+                  puts "La categoria seleccionada no corresponde a ninguna de las existentes en sistema." 
+                end
+
+
+              end
+
+               
+            when 7
+              throw NotImplementedError
+            when 8
+              throw NotImplementedError
+            else
+              puts "Debe ingresar una opcion valida"
+            end
+
+            puts "¿Qué desea hacer ahora?"
+            puts "\t1) Aplicar otro filtro\n"+
+                 "\t2) Buscar\n"
+
+            while (true ) 
+              
+              case ask_input.chomp.to_i
+              when 1
+                break
+              when 2
+                for movie in filtered_movies
+                  puts movie
+                end
+
+                return 
+              else
+                puts "Debe ingresar una opcion valida"
+              end
+            end
+  
+          end
+  
+        else
+          puts "Debe ingresar una opcion valida"
+        end
+
+      end
+
+
+    end
+=begin
+ #usar .include?
+ nombre
+ nombre dir
+ nombre act
+
+ a;o 
+ duracion
+ precio compra
+ precio alquiler
+
+ categorias
+=end
+
 end
 
 client = Client.new() 
