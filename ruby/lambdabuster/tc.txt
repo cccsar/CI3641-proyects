@@ -8,6 +8,12 @@
 }
 ,
 {
+"name":"Budu",
+"birthday":"1984-07-12",
+"nationality":"namekuseiyin"
+}
+,
+{
 "name":"Jose",
 "birthday":"1992-05-14",
 "nationality":"english"
@@ -38,9 +44,22 @@
 "release-date":"1997-05-19",
 "directors":["Pepe"],
 "actors":["Juan","Jose"],
-"price":69.42,
-"rent_price":42.69,
+"price":2,
+"rent_price":4,
 "premiere":false,
+"discount":1
+}
+,
+{
+"name":"Yet another venekan druglord/kidnap/malandros movie",
+"runtime":69,
+"categories":["Stupid ass repetitive","gunshots","unnecesary extreme violence","stop making movies like this please"],
+"release-date":"2000-04-03",
+"directors":["Budu"],
+"actors":["Juan","Jose"],
+"price":14,
+"rent_price":3,
+"premiere":true,
 "discount":0
 }
 ]
