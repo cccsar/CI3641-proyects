@@ -136,9 +136,9 @@ class Client
         
             case choice.to_i
             when 1 
-              rent_order 
+              an_order true
             when 2 
-              throw NotImplementedError
+              an_order false
             when 3 
               check_user 
             when 4 
@@ -153,71 +153,72 @@ class Client
         end    
     end
 
-    def rent_order 
+    def an_order type
   
         while (true) 
       
-            puts "Ingrese el nombre de la pelicula que desea alquilar" 
+            payment_meth = type ? "alquilar" : "comprar"
+            puts "Ingrese el nombre de la pelicula que desea #{payment_meth}" 
             req_movie = ask_input
             
             search_result = @movie_catalog.list.find { |movie| movie.name == req_movie }
             
             if search_result.nil? 
                 while ( true ) 
-                puts "La pelicula ingresada no existe. ¿Qué desea hacer?\n"+
-                    "1) Regresar\n"+
-                    "2) Consultar catálogo\n"+
-                    "3) Repetir consulta\n"
-                choice = ask_input
+                  puts "La pelicula ingresada no existe. ¿Qué desea hacer?\n"+
+                      "1) Regresar\n"+
+                      "2) Consultar catálogo\n"+
+                      "3) Repetir consulta\n"
+                  choice = ask_input
+              
+                  case choice.to_i
+                  when 1
+                      return 
+                  when 2
+                      throw NotImplementedError # llama a la opcion 3 del menu principal
+                      return
+                  when 3
+                      break        
+                  else
+                      puts "Ingrese una opcion valida" 
+                  end
+              
+                  end
+              else
+                  puts "Información de la película"
+                  puts search_result
+                  
+                  gd = true
+                  while ( gd ) 
+          
+                    puts "Ingrese un metodo de pago. Disponibles:\n"+
+                        "1) Dolares\n"+
+                        "2) Bolivares\n"+
+                        "3) Euros\n"+
+                        "4) Bitcoins\n"+
+                        "5) Volver a menu principal" 
             
-                case choice.to_i
-                when 1
-                    return 
-                when 2
-                    throw NotImplementedError # llama a la opcion 3 del menu principal
-                    return
-                when 3
-                    break        
-                else
-                    puts "Ingrese una opcion valida" 
-                end
+                    choice = ask_input
+                    actual_price = type ? search_result.rent_price.dolars : search_result.price.dolars
+                    in_dollars = "#{actual_price}"
             
-                end
-            else
-                puts "Información de la película"
-                puts search_result
-                
-                gd = true
-                while ( gd ) 
-        
-                puts "Ingrese un metodo de pago. Disponibles:\n"+
-                    "1) Dolares\n"+
-                    "2) Bolivares\n"+
-                    "3) Euros\n"+
-                    "4) Bitcoins\n"+
-                    "5) Volver a menu principal" 
-        
-                choice = ask_input
-        
-                in_dollars = "#{search_result.rent_price.dolars}"
-        
-                case choice.to_i
-                when 1
-                    puts "Total a pagar: "+in_dollars 
-                when 2 
-                    puts "Total a pagar: #{search_result.rent_price.dolars.in(:bolivar)} | "+in_dollars 
-                when 3
-                    puts "Total a pagar: #{search_result.rent_price.dolars.in(:euro)} | "+in_dollars 
-                when 4
-                    puts "Total a pagar: #{search_result.rent_price.dolars.in(:bitcoin)} | "+in_dollars 
-                when 5
-                    return 
-                else
-                    puts "Debe ingresar un metodo de pago valido"  
-                    next
-                end
-        
-                gd = false
+                    case choice.to_i
+                    when 1
+                        puts "Total a pagar: "+in_dollars 
+                    when 2 
+                        puts "Total a pagar: #{actual_price.in(:bolivar)} | "+in_dollars 
+                    when 3
+                        puts "Total a pagar: #{actual_price.in(:euro)} | "+in_dollars 
+                    when 4
+                        puts "Total a pagar: #{actual_price.in(:bitcoin)} | "+in_dollars 
+                    when 5
+                        return 
+                    else
+                        puts "Debe ingresar un metodo de pago valido"  
+                        next
+                    end
+            
+                    gd = false
                 
                 end
         
@@ -225,18 +226,22 @@ class Client
         
                 choice = ask_input 
         
-        
                 case choice.to_i
                 when 1 
-                trans      = Transaction.new(search_result,:rent)  
-                trans.date = Date.today + 2
+                  trans      =  Transaction.new(search_result, type ? :rent : :buy)
+                  trans.date = Date.today + 2 if type 
         
-                @user.transactions<<trans
-                @user.rented_movies<<search_result
-                puts "Su compra ha sido registrada"
+                  @user.transactions<<trans
+                  
+                  if type 
+                    @user.rented_movies<<search_result
+                  else
+                    @user.owned_movies<<search_result
+                  end
+
+                  puts "Su compra ha sido registrada"
+                  return
                 end
-        
-                return 
             end
         end  
     end
@@ -286,10 +291,12 @@ class Client
                 case choice.to_i
                 when 1
                     puts "información sobre actores:" 
-                    puts found_mv.actors
+                    #puts found_mv.actors
+                    found_mv.actors.list.each { |act| puts "\t #{act}" } 
                 when 2
                     puts "información sobre directores:"
-                    puts found_mv.directors
+                    #puts found_mv.directors
+                    found_mv.directors.list.each{ |act| puts "\t #{act}" } 
                 when 3
                     return
                 else
