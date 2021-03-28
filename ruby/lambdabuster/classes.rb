@@ -802,7 +802,6 @@ def check_user movies_db
 end
 
 
-main
 =begin
  # proof that Discount and Premiere are 'composable' 
 movie_catalog.each do 

@@ -14,34 +14,32 @@ end
 
 # -- Main Code ------------------- +
 class Client
-    attr_reader :known_persons, :known_actors, :known_directors, :movie_catalog, :existing_categories, :user
+    attr_reader  :persons_map, :actors_map, :directors_map, :movie_catalog, :categories_set, :user
     
-    def initialize (known_persons = Map.new(), 
-                    known_actors = Map.new(),
-                    known_directors = Map.new(),
-                    movie_catalog = SearchList.new(),
-                    existing_categories = Set.new(),
-                    user = User.new()
+    def initialize (persons_map    = Hash.new(), 
+                    actors_map     = Hash.new(),
+                    directors_map  = Hash.new(),
+                    movie_catalog  = SearchList.new(),
+                    categories_set = Set[],
+                    user           = User.new()
                    ) 
-      @known_persons       = known_persons       # map of person by name 
-      @known_actors        = known_actors        # map of actors by name, coungrent with known persons
-      @known_directors     = known_directors     # map of directors by name, coungrent with known persons
-      @movie_catalog       = movie_catalog       # SearchList of movies
-      @existing_categories = existing_categories # set of movie categories
-      @user                = user                # a user
+      @persons_map    = persons_map     # map of person by name 
+      @actors_map     = actors_map     # map of actors by name, coungrent with known persons
+      @directors_map  = directors_map  # map of directors by name, coungrent with known persons
+      @movie_catalog  = movie_catalog  # SearchList of movies
+      @categories_set = categories_set # set of movie categories
+      @user           = user           # a user
     end
 
     def main 
-        # Objects to use across user interation.
-        persons_map    = Hash.new() 
-        actors_map     = Hash.new()
-        directors_map  = Hash.new() 
-        movie_catalog  = SearchList.new()
-        categories_set = Set[]
+        puts "Bienvenido a Lambdabuster!"
+        my_json = read_json_file
+        gather_json_info my_json
+        interaction
+    end
+
+    def read_json_file # Proper JSON read.
         
-        greet = "Bienvenido a Lambdabuster!"
-        
-        # Proper JSON read.
         while ( true ) 
         
             print "Ingrese el nombre de un archivo JSON correctamente formateado: "
@@ -49,53 +47,56 @@ class Client
         
             if (File.exist?(filename)) then
         
-            fObject = File.open(filename) 
-            fString = fObject.read 
-            fObject.close 
+              fObject = File.open(filename) 
+              fString = fObject.read 
+              fObject.close 
         
-            myJson = JSON.parse(fString)
-            break 
+              return JSON.parse(fString)
+
             else
-            puts "No such a file named #{filename}"
+              puts "No such a file named #{filename}"
             end
         
         end
+
+    end 
         
+    def gather_json_info my_json
         
         # Traversal of json and information gathering.
         
-        for actor_descriptor in myJson["actors"]  # Gather actors information
+        for actor_descriptor in my_json["actors"]  # Gather actors information
             name        = actor_descriptor["name"]
             birthday    = Date.parse ( actor_descriptor["birthday"]  )
             nationality = actor_descriptor["nationality"]
         
             thisPerson = Person.new(name, birthday, nationality)  
         
-            persons_map[name] = thisPerson 
-            actors_map[name]  = Actor.new(thisPerson) 
+            @persons_map[name] = thisPerson 
+            @actors_map[name]  = Actor.new(thisPerson) 
         end
         
-        for director_descriptor in myJson["directors"] # Gather directors information
+        for director_descriptor in my_json["directors"] # Gather directors information
             name        = director_descriptor["name"]
             birthday    = Date.parse( director_descriptor["birthday"]  )
             nationality = director_descriptor["nationality"]
         
             thisPerson = Person.new(name, birthday, nationality) 
         
-            persons_map[name]   = thisPerson if !persons_map.include?(name)
-            directors_map[name] = Director.new(thisPerson)
+            @persons_map[name]   = thisPerson if !@persons_map.include?(name)
+            @directors_map[name] = Director.new(thisPerson)
         end
         
         
-        for movie_descriptor in myJson["movies"]  # gather movies information
+        for movie_descriptor in my_json["movies"]  # gather movies information
             name         = movie_descriptor["name"]
             runtime      = movie_descriptor["runtime"]
             categories   = Set.new( movie_descriptor["categories"] )
             release_date = Date.parse( movie_descriptor["release-date"]  )
         
             # Retrieve every Director and Actor object to place whithin current movie
-            dirs = movie_descriptor["directors"].map { |nm| directors_map[nm] }
-            acts = movie_descriptor["actors"].map { |nm| actors_map[nm] } 
+            dirs = movie_descriptor["directors"].map { |nm| @directors_map[nm] }
+            acts = movie_descriptor["actors"].map { |nm| @actors_map[nm] } 
         
             price      = movie_descriptor["price"]
             rent_price = movie_descriptor["rent_price"]
@@ -109,26 +110,19 @@ class Client
             dirs.each { |dir| dir.directed << this_movie }  
             acts.each { |act| act.starred_in << this_movie }
         
-            categories_set.merge(categories)  # update categories set with current categories
+            @categories_set.merge(categories)  # update categories set with current categories
             
             # Update movie's price/rent_price depending on the presence of necessary attributes
             this_movie = Premiere.new(this_movie) if premiere
             this_movie = Discount.new(this_movie, discount) if discount != 0
         
-            movie_catalog<<this_movie          # update movie catalog with current movie
+            @movie_catalog<<this_movie          # update movie catalog with current movie
         
         end
         
-        
-        # Client creation
-        movies_db = Client.new(persons_map,actors_map,directors_map,movie_catalog,categories_set) 
-        
-        
-        # Start of dialog
-        # *Cree ask_input para pedir texto al usuario usando un prompt
-        # *use puros case con numeros para manejar opciones que escoge el usuario
-        # *movies_db lo es todo, todas las consultas se hacen sobre los objetos cargados en ella
-        # *xD
+    end
+
+    def interaction    
         
         while (true) 
             puts "¿Qué desea hacer?\n"+
@@ -138,35 +132,35 @@ class Client
                 "4) Consultar catálogo\n"+
                 "5) Salir\n"
         
-            choice = ask_input # From here, jump to other functions
+            choice = ask_input 
         
             case choice.to_i
             when 1 
-            rent_order movies_db
+              rent_order 
             when 2 
-            throw NotImplementedError
+              throw NotImplementedError
             when 3 
-            check_user movies_db
+              check_user 
             when 4 
-            throw NotImplementedError
+              throw NotImplementedError
             when 5 
-            puts "Hasta la proxima"
-            break
+              puts "Hasta la proxima"
+              break
             else
-            inform "Opción inválida. Debe seleccionar un número del 1 al 7" 
+              inform "Opción inválida. Debe seleccionar un número del 1 al 7" 
             end
             
         end    
     end
 
-    def rent_order movies_db
+    def rent_order 
   
         while (true) 
       
             puts "Ingrese el nombre de la pelicula que desea alquilar" 
             req_movie = ask_input
             
-            search_result = movies_db.movie_catalog.list.find { |movie| movie.name == req_movie }
+            search_result = @movie_catalog.list.find { |movie| movie.name == req_movie }
             
             if search_result.nil? 
                 while ( true ) 
@@ -237,8 +231,8 @@ class Client
                 trans      = Transaction.new(search_result,:rent)  
                 trans.date = Date.today + 2
         
-                movies_db.user.transactions<<trans
-                movies_db.user.rented_movies<<search_result
+                @user.transactions<<trans
+                @user.rented_movies<<search_result
                 puts "Su compra ha sido registrada"
                 end
         
@@ -246,22 +240,23 @@ class Client
             end
         end  
     end
-    def check_user movies_db
 
-        if (movies_db.user.rented_movies.list.length > 0) 
+    def check_user 
+
+        if (@user.rented_movies.list.length > 0) 
             puts "peliculas alquiladas:" 
             print "\t"
 
-            for mv in movies_db.user.rented_movies.list
+            for mv in @user.rented_movies.list
                 print mv.name
             end
             puts ""    
         end
     
-        if (movies_db.user.owned_movies.list.length > 0) 
+        if (@user.owned_movies.list.length > 0) 
             puts "peliculas compradas:" 
             print "\t"
-            for mv in movies_db.user.owned_movies.list
+            for mv in @user.owned_movies.list
                 print mv.name
             end
             puts ""    
@@ -274,8 +269,8 @@ class Client
         if req_movie.empty? 
             return 
         else
-            mv   = movies_db.user.owned_movies.list.find { |movie| movie.name == req_movie }
-            mv_1 = movies_db.user.rented_movies.list.find { |movie| movie.name == req_movie }
+            mv   = @user.owned_movies.list.find { |movie| movie.name == req_movie }
+            mv_1 = @user.rented_movies.list.find { |movie| movie.name == req_movie }
             if mv.nil?  && mv_1.nil?
                 puts "La pelicula a consultar no se encuentra entre sus peliculas rentadas o alquiladas"
             else
@@ -306,3 +301,7 @@ class Client
         end  
     end
 end
+
+client = Client.new() 
+
+client.main
