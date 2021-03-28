@@ -90,7 +90,7 @@ class Actor
 
   def to_s
     @person.to_s
-    @starred_in.list.map{|mv| mv.name}.join(", ") # only names of movies
+    "starred in: #{@starred_in.list.map{|mv| mv.name}.join(", ")}" # only names of movies
   end
 
 end 
@@ -119,7 +119,7 @@ class Director
 
   def to_s
     @person.to_s
-    @directed.list.map{|mv| mv.name}.join(", ") # only names of movies
+    "directed: #{@directed.list.map{|mv| mv.name}.join(", ")}" # only names of movies
   end
 
 end 
@@ -170,7 +170,7 @@ class Movie
     # Build line by line with string interpolation
     l1 = "\t#{@name} (#{@release_date}) - Hours #{hours} Mins #{mins}\n"
     l2 = "\tGenres: #{categories}\n"
-    l3 = "\tDirected by: #{dir_names}" #"\tDirected by: #{@directors}\n"
+    l3 = "\tDirected by: #{dir_names}\n" #"\tDirected by: #{@directors}\n"
     l4 = "\tCast: #{act_names}" # "\tCast: #{@actors}"
 
     return l1 + l2 + l3 + l4 
@@ -588,7 +588,7 @@ def main
     premiere   = movie_descriptor["premiere"]
     discount   = movie_descriptor["discount"]
   
-    this_movie = Movie.new(name,runtime,categories,release_date, SearchList.new(*dirs.each), SearchList.new(*acts),price,rent_price)
+    this_movie = Movie.new(name,runtime,categories,release_date, SearchList.new(*dirs), SearchList.new(*acts),price,rent_price)
   
     # For every actor and director relate it to the current movie by making it star or director
     dirs.each { |dir| dir.directed << this_movie }  
