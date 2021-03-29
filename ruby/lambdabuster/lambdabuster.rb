@@ -15,15 +15,16 @@ end
 # get an option and validate it
 def select_option options
   while true
+    puts "¿Qué deseas hacer"
     i = 1
     for option in options
       puts "\t#{i}) #{option}"
       i += 1
     end
 
-    input = ask_input
+    input = ask_input.to_i
 
-    if input.to_i >= 1 && < input.to_i <= options.length
+    if input >= 1 &&  input <= options.length
       return input
     else
       inform "'#{input}' no es una opción válida"
@@ -35,7 +36,7 @@ end
 def request_input (request, &validation)
   while true
     puts request
-    input = ask_input
+    input = ask_input.chomp
 
     if validation.call(input)
       return input
@@ -72,25 +73,15 @@ class Client
     end
 
     def read_json_file # Proper JSON read.
-        
-        while ( true ) 
-        
-            print "Ingrese el nombre de un archivo JSON correctamente formateado: "
-            filename = gets.chomp
-        
-            if (File.exist?(filename)) then
-        
-              fObject = File.open(filename) 
-              fString = fObject.read 
-              fObject.close 
-        
-              return JSON.parse(fString)
+        const = "Ingrese el nombre de un archivo JSON correctamente formateado: "
 
-            else
-              puts "No such a file named #{filename}"
-            end
-        
-        end
+        filename = request_input(const) { |fname| File.exist?(fname) }
+    
+        fObject = File.open(filename) 
+        fString = fObject.read 
+        fObject.close 
+    
+        return JSON.parse(fString)
 
     end 
         
@@ -157,125 +148,116 @@ class Client
 
     def interaction    
         
-        while (true) 
-            puts "¿Qué desea hacer?\n"+
-                "\t1) Crear nueva orden de alquiler\n"+
-                "\t2) Crear nueva orden de compra\n"+
-                "\t3) Mi usuario\n"+
-                "\t4) Consultar catálogo\n"+
-                "\t5) Salir\n"
-        
-            choice = ask_input 
-        
-            case choice.to_i
-            when 1 
-              an_order true
-            when 2 
-              an_order false
-            when 3 
-              check_user 
-            when 4 
-              filtering
-            when 5 
-              puts "Hasta la proxima"
-              break
-            else
-              inform "Opción inválida. Debe seleccionar un número del 1 al 7" 
-            end
-            
-        end    
+      interaction_options = ["Crear nueva orden de alquiler","Crea nueva orden de compra","Mi usuario", "Consultar catálogo","Salir"]
+      choice = select_option interaction_options
+      
+      case choice
+      when 1 
+        an_order true
+      when 2 
+        an_order false
+      when 3 
+        check_user 
+      when 4 
+        filtering
+      when 5 
+        puts "Hasta la proxima"
+        return
+      else
+        inform "Opción inválida. Debe seleccionar un número del 1 al 7" 
+      end
+
+      interaction
     end
 
     def an_order type
   
-        while (true) 
-      
-            payment_meth = type ? "alquilar" : "comprar"
-            puts "Ingrese el nombre de la pelicula que desea #{payment_meth}" 
-            req_movie = ask_input
-            
-            search_result = @movie_catalog.list.find { |movie| movie.name == req_movie }
-            
-            if search_result.nil? 
-                while ( true ) 
-                  puts "La pelicula ingresada no existe. ¿Qué desea hacer?\n"+
-                      "\t1) Regresar\n"+
-                      "\t2) Consultar catálogo\n"+
-                      "\t3) Repetir consulta\n"
-                  choice = ask_input
-              
-                  case choice.to_i
-                  when 1
-                    return 
-                  when 2
-                    filtering 
-                  when 3
-                    break        
-                  else
-                    puts "Ingrese una opcion valida" 
-                  end
-              
-                end
-            else
-                  puts "Información de la película"
-                  puts search_result
-                  
-                  gd = true
-                  while ( gd ) 
-          
-                    puts "Ingrese un metodo de pago. Disponibles:\n"+
-                        "\t1) Dolares\n"+
-                        "\t2) Bolivares\n"+
-                        "\t3) Euros\n"+
-                        "\t4) Bitcoins\n"+
-                        "\t5) Volver a menu principal" 
-            
-                    choice = ask_input
-                    actual_price = type ? search_result.rent_price.dolars : search_result.price.dolars
-                    in_dollars = "#{actual_price}"
-            
-                    case choice.to_i
-                    when 1
-                        puts "Total a pagar: "+in_dollars 
-                    when 2 
-                        puts "Total a pagar: #{actual_price.in(:bolivar)} | "+in_dollars 
-                    when 3
-                        puts "Total a pagar: #{actual_price.in(:euro)} | "+in_dollars 
-                    when 4
-                        puts "Total a pagar: #{actual_price.in(:bitcoin)} | "+in_dollars 
-                    when 5
-                        return 
-                    else
-                        puts "Debe ingresar un metodo de pago valido"  
-                        next
-                    end
-            
-                    gd = false
-                
-                end
+        payment_meth = type ? "alquilar" : "comprar"
+        puts "Ingrese el nombre de la pelicula que desea #{payment_meth}" 
+        req_movie = ask_input
         
-                puts "Desea continuar con la transaccion?\n1) Si\n2) No"
+        search_result = @movie_catalog.list.find { |movie| movie.name == req_movie }
         
-                choice = ask_input 
-        
-                case choice.to_i
-                when 1 
-                  trans      =  Transaction.new(search_result, type ? :rent : :buy)
-                  trans.date = Date.today + 2 if type 
-        
-                  @user.transactions<<trans
-                  
-                  if type 
-                    @user.rented_movies<<search_result
-                  else
-                    @user.owned_movies<<search_result
-                  end
+        if search_result.nil? 
+            out_options = ["Regresar","Consultar catálogo","Repetir consulta"]
 
-                  puts "Su compra ha sido registrada"
-                  return
-                end
+            puts "La pelicula ingresada no existe\n"
+
+            choice = select_option out_options
+         
+            case choice
+            when 1
+              return 
+            when 2
+              filtering 
+            when 3
+              an_order type
+            else
+              puts "Ingrese una opcion valida" 
             end
-        end  
+          
+        else
+         puts "Información de la película"
+         puts search_result
+           
+          gd = true
+          
+          while ( gd ) 
+    
+            puts "Ingrese un metodo de pago. Disponibles:\n"+
+                "\t1) Dolares\n"+
+                "\t2) Bolivares\n"+
+                "\t3) Euros\n"+
+                "\t4) Bitcoins\n"+
+                "\t5) Volver a menu principal" 
+    
+            choice = ask_input
+            actual_price = type ? search_result.rent_price.dolars : search_result.price.dolars
+            in_dollars = "#{actual_price}"
+    
+            case choice.to_i
+            when 1
+                puts "Total a pagar: "+in_dollars 
+            when 2 
+                puts "Total a pagar: #{actual_price.in(:bolivar)} | "+in_dollars 
+            when 3
+                puts "Total a pagar: #{actual_price.in(:euro)} | "+in_dollars 
+            when 4
+                puts "Total a pagar: #{actual_price.in(:bitcoin)} | "+in_dollars 
+            when 5
+                return 
+            else
+                puts "Debe ingresar un metodo de pago valido"  
+                next
+            end
+    
+            gd = false
+            
+          end
+    
+          options = ["Si","No"] 
+
+          puts "Desea continuar con la transaccion?"
+   
+          choice = select_option options 
+  
+          if choice == 1
+            trans      =  Transaction.new(search_result, type ? :rent : :buy)
+            trans.date = Date.today + 2 if type 
+  
+            @user.transactions<<trans
+            
+            if type 
+              @user.rented_movies<<search_result
+            else
+              @user.owned_movies<<search_result
+            end
+
+            puts "Su compra ha sido registrada"
+          end
+
+          return 
+        end
     end
 
     def check_user 
@@ -299,28 +281,31 @@ class Client
             puts ""    
         end
     
-        puts "Ingrese el nombre de una películar a consultar. De no desearlo pulse enter: " 
-    
-        req_movie = ask_input.chomp
-    
-        if req_movie.empty? 
-            return 
-        else
+        while ( true ) 
+          puts "Ingrese el nombre de una películar a consultar. De no desearlo pulse enter: " 
+      
+          req_movie = ask_input.chomp
+      
+          if req_movie.empty? 
+              return 
+          else
             mv   = @user.owned_movies.list.find { |movie| movie.name == req_movie }
             mv_1 = @user.rented_movies.list.find { |movie| movie.name == req_movie }
+
             if mv.nil?  && mv_1.nil?
-                puts "La pelicula a consultar no se encuentra entre sus peliculas rentadas o alquiladas"
+              puts "La pelicula a consultar no se encuentra entre sus peliculas rentadas o alquiladas"
             else
-                puts "Informacion sobre #{req_movie}: "
-                found_mv = mv.nil? ? mv_1 : mv
+              puts "Informacion sobre #{req_movie}: "
+              found_mv = mv.nil? ? mv_1 : mv
         
-                puts found_mv 
-                while ( true ) 
-                puts "1) Consultar actores\n2) Consultar directores\n3) Regresar"
+              puts found_mv 
+  
+              while ( true ) 
+                consult_opt = ["Consultar actores", "Consultar directores", "Regresar"] 
+    
+                choice = select_option consult_opt
         
-                choice = ask_input.chomp
-        
-                case choice.to_i
+                case choice
                 when 1
                     puts "información sobre actores:" 
                     found_mv.actors.list.each { |act| puts "\t #{act}" } 
@@ -328,14 +313,13 @@ class Client
                     puts "información sobre directores:"
                     found_mv.directors.list.each{ |act| puts "\t #{act}" } 
                 when 3
-                    return
-                else
-                    puts "Ingrese una opcion valida" 
+                    break 
                 end
-        
-                end
+              end
+  
             end 
-        end  
+          end  
+       end
     end
 
     def filtering
@@ -374,13 +358,13 @@ class Client
     
             case ask_input.chomp.to_i
             when 1
-              throw NotImplementedError
+              filtered_movies = name_match(filtered_movies,:name) 
             when 2
               filtered_movies = manage_ord(filtered_movies,"entero",:release_date)  
             when 3
-              throw NotImplementedError
+              filtered_movies = name_match(filtered_movies,:directors) 
             when 4
-              throw NotImplementedError
+              filtered_movies = name_match(filtered_movies,:actors)
             when 5
               filtered_movies = manage_ord(filtered_movies,"entero",:runtime) 
             when 6
@@ -456,6 +440,7 @@ class Client
               else
                 puts "Debe ingresar una opcion valida"
               end
+
             end
   
           end
@@ -541,42 +526,43 @@ class Client
 
       to_add = [] 
 
-      while ( true ) 
-        puts "Escoja una de las siguientes opciones:"
-        puts "\t1) Coincidencia exacta\n2) Coincidencia parcial\n"
+      options = ["Coincidencia exacta", "Coincidencia parcial"] 
+      choice = select_option options
 
-        case ask_input.chomp.to_i
-        when 1
-          to_add = @movie_catalog.list.filter do 
-            | movie |
-            chk = movie.method(atom).()
-            
-            if chk.class == String
-            else
-            end
-          end
-        when 2
-        else
-          puts "Debe ingresar una opcion valida" 
+      puts "Ingrese el string a matchear:" 
+      to_match = ask_input
+
+
+      case choice
+      when 1
+        to_add = @movie_catalog.list.filter do 
+         | movie |
+         chk = movie.method(atom).()
+          
+         if chk.class == String
+           chk == to_match
+         else
+           chk.list.map { |aod| aod.name }.include?(to_match) 
+         end
+
         end
+      when 2
+       to_add = @movie_catalog.list.filter do 
+         |movie| 
+         chk = movie.method(atom).()
+
+         if chk.class == String
+           chk.include?(to_match) 
+         else
+           chk.list.map { |aod| aod.name }.filter{ |aod| aod.include?(to_match) }.any?
+         end
+
+       end
       end
+
+      filtered_movies = filtered_movies | to_add.to_set
+      return filtered_movies
     end
-
-
-=begin
- #usar .include?
- nombre
-
- nombre dir
- nombre act
-
- a;o 
- duracion
- precio compra
- precio alquiler
-
- categorias
-=end
 
 end
 
