@@ -57,7 +57,7 @@ class Client
                     categories_set = Set[],
                     user           = User.new()
                    ) 
-      @persons_map    = persons_map     # map of person by name 
+      @persons_map    = persons_map    # map of person by name 
       @actors_map     = actors_map     # map of actors by name, coungrent with known persons
       @directors_map  = directors_map  # map of directors by name, coungrent with known persons
       @movie_catalog  = movie_catalog  # SearchList of movies
@@ -333,7 +333,6 @@ class Client
   
         case ask_input.chomp.to_i
         when 1
-          # Mostrar todas las peliculas en el sistema y hacer break
           for movie in @movie_catalog
             puts movie
           end
@@ -391,7 +390,6 @@ class Client
                     when 1
                       break  
                     when 2 
-                      # Gather movies matching requested cathegories
                       for cat in accum_cathegories
                         matching_movies = movie_catalog.list.filter { |mv| mv.categories.include?( cat ) } 
                         filtered_movies = filtered_movies | matching_movies
@@ -479,7 +477,7 @@ class Client
             val_tc.class == Date ? val_tc.year < num : val_tc < num 
           end
         when 2
-          to_add = @movie_catalog.list.filter do #{ |movie| movie.method(atom).() <= num } 
+          to_add = @movie_catalog.list.filter do 
             |movie| 
 
             val_tc = movie.method(atom).()
