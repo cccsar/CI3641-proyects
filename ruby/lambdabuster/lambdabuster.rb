@@ -173,17 +173,17 @@ class Client
               
                   case choice.to_i
                   when 1
-                      return 
+                    return 
                   when 2
-                      throw NotImplementedError # llama a la opcion 3 del menu principal
-                      return
+                    filtering 
+                    return
                   when 3
-                      break        
+                    break        
                   else
-                      puts "Ingrese una opcion valida" 
+                    puts "Ingrese una opcion valida" 
                   end
               
-                  end
+                end
               else
                   puts "Información de la película"
                   puts search_result
