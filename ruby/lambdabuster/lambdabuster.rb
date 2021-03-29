@@ -504,7 +504,29 @@ class Client
 
     end
 
-    def name_match
+    def name_match (filtered_movies, atom) 
+
+      to_add = [] 
+
+      while ( true ) 
+        puts "Escoja una de las siguientes opciones:"
+        puts "\t1) Coincidencia exacta\n2) Coincidencia parcial\n"
+
+        case ask_input.chomp.to_i
+        when 1
+          to_add = @movie_catalog.list.filter do 
+            | movie |
+            chk = movie.method(atom).()
+            
+            if chk.class == String
+            else
+            end
+          end
+        when 2
+        else
+          puts "Debe ingresar una opcion valida" 
+        end
+      end
     end
 
 
