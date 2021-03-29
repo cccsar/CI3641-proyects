@@ -344,13 +344,13 @@ class Client
             when 1
               throw NotImplementedError
             when 2
-              throw NotImplementedError
+              filtered_movies = manage_ord(filtered_movies,"entero",:release_date)  
             when 3
               throw NotImplementedError
             when 4
               throw NotImplementedError
             when 5
-              throw NotImplementedError
+              filtered_movies = manage_ord(filtered_movies,"entero",:runtime) 
             when 6
               accum_cathegories = Set.new() 
 
@@ -367,10 +367,10 @@ class Client
                 if categories_set.include?( req_cathegory )  
                   accum_cathegories.add( req_cathegory ) 
 
-                  puts "¿Desea añadir más filtros?"
-                  puts "\t1) Si\n\t2) No\n"
-
                   while ( true ) 
+                    puts "¿Desea añadir más filtros?"
+                    puts "\t1) Si\n\t2) No\n"
+
                     case ask_input.chomp.to_i
                     when 1
                       break  
@@ -384,7 +384,7 @@ class Client
                       finished = true
                       break
                     else
-                      throw NotImplementedError
+                      puts "Debe ingresar una opción válida"
                     end
                   end
 
@@ -399,9 +399,9 @@ class Client
 
                
             when 7
-              throw NotImplementedError
+              filtered_movies = manage_ord(filtered_movies,"en punto flotante",:price) 
             when 8
-              throw NotImplementedError
+              filtered_movies = manage_ord(filtered_movies,"en punto flotante",:rent_price) 
             else
               puts "Debe ingresar una opcion valida"
             end
@@ -436,9 +436,83 @@ class Client
 
 
     end
+
+    def manage_ord (filtered_movies,type,atom)  
+
+      puts "Ingrese un numero #{type} " 
+      num = ask_input.chomp.to_i
+
+      to_add = []  
+
+      while ( true ) 
+        puts "Escoja una de las siguientes opciones:"
+        puts "\t1) < num\n"+
+             "\t2) <= num\n"+
+             "\t3) == num\n"+
+             "\t4) > num\n"+
+             "\t5) >= num\n"
+
+        case ask_input.chomp.to_i
+        when 1
+          to_add = @movie_catalog.list.filter do 
+            |movie| 
+
+            val_tc = movie.method(atom).()
+
+            val_tc.class == Date ? val_tc.year < num : val_tc < num 
+          end
+        when 2
+          to_add = @movie_catalog.list.filter do #{ |movie| movie.method(atom).() <= num } 
+            |movie| 
+
+            val_tc = movie.method(atom).()
+
+            val_tc.class == Date ? val_tc.year <= num : val_tc <= num 
+          end
+        when 3
+          to_add = @movie_catalog.list.filter do 
+            |movie| 
+
+            val_tc = movie.method(atom).()
+
+            val_tc.class == Date ? val_tc.year == num : val_tc == num 
+          end
+        when 4
+          to_add = @movie_catalog.list.filter do 
+            |movie| 
+
+            val_tc = movie.method(atom).()
+
+            val_tc.class == Date ? val_tc.year > num : val_tc > num 
+          end
+        when 5
+          to_add = @movie_catalog.list.filter do 
+            |movie| 
+
+            val_tc = movie.method(atom).()
+
+            val_tc.class == Date ? val_tc.year >= num : val_tc >= num 
+          end
+        else
+          puts "Debe ingresar una opcion valida" 
+          next
+        end
+
+        filtered_movies = filtered_movies | to_add.to_set
+        return filtered_movies
+
+      end
+
+    end
+
+    def name_match
+    end
+
+
 =begin
  #usar .include?
  nombre
+
  nombre dir
  nombre act
 
