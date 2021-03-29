@@ -176,7 +176,6 @@ class Client
                     return 
                   when 2
                     filtering 
-                    return
                   when 3
                     break        
                   else
@@ -184,7 +183,7 @@ class Client
                   end
               
                 end
-              else
+            else
                   puts "Información de la película"
                   puts search_result
                   

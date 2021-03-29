@@ -89,7 +89,7 @@ class Actor
   end
 
   def to_s
-    @person.to_s + "| starred in: #{@starred_in.list.map{|mv| mv.name}.join(", ")}" # only names of movies
+    @person.to_s + " | starred in: #{@starred_in.list.map{|mv| mv.name}.join(", ")}" # only names of movies
   end
 
 end 
@@ -117,7 +117,7 @@ class Director
   end
 
   def to_s
-    @person.to_s + "| directed: #{@directed.list.map{|mv| mv.name}.join(", ")}" # only names of movies
+    @person.to_s + " | directed: #{@directed.list.map{|mv| mv.name}.join(", ")}" # only names of movies
   end
 
 end 
