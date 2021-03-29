@@ -1,0 +1,79 @@
+{
+    "directors":[
+        {
+            "name":"Pepe",
+            "birthday":"2014-05-03",
+            "nationality":"veneco"
+        },
+        {
+            "name":"Budu",
+            "birthday":"1984-07-12",
+            "nationality":"namekuseiyin"
+        },
+        {
+            "name":"Jose",
+            "birthday":"1992-05-14",
+            "nationality":"english"
+        },
+        {
+            "name" : "Román Chabó",
+            "birthday" : "1992-03-24",
+            "nationality" : "venekistan"
+        }
+    ],
+    "actors": [
+        {
+            "name":"Jose",
+            "birthday":"1992-05-14",
+            "nationality":"english"
+        },
+        {
+            "name":"Juan",
+            "birthday":"2000-02-29",
+            "nationality":"fuckthepolish"
+        },
+        {
+            "name" : "Edgar Ramírez",
+            "birthday" : "1783-05-24",
+            "nationality" : "gran colombino"
+        }
+    ],
+    "movies": [
+        {
+            "name":"a nightmare in caracas",
+            "runtime":12312,
+            "categories":["Horror","Even more horror","gore","I'm scared"],
+            "release-date":"1997-05-19",
+            "directors":["Pepe"],
+            "actors":["Juan","Jose"],
+            "price":2,
+            "rent_price":4,
+            "premiere":false,
+            "discount":1
+        },
+        {
+            "name":"Yet another venekan druglord/kidnap/malandros movie",
+            "runtime":69,
+            "categories":["Stupid ass repetitive","gunshots","unnecesary extreme violence","stop making movies like this please"],
+            "release-date":"2000-04-03",
+            "directors":["Budu"],
+            "actors":["Juan","Jose"],
+            "price":14,
+            "rent_price":3,
+            "premiere":true,
+            "discount":0
+        },
+        {
+            "name" : "Some guy box its way out of petare",
+            "runtime" : 420,
+            "categories" : ["boxing", "dark & deep", "third world reality", "i mean, not bc it's venekan it should be in petare"],
+            "release-date" : "2000-04-09",
+            "directors" : ["Román Chabó"],
+            "actors"    : ["Edgar Ramírez", "Juan", "Jose"],
+            "price"     : 20,
+            "rent_price" : 8,
+            "premiere"   : false,
+            "discount"   : 4
+        }
+    ]
+}
