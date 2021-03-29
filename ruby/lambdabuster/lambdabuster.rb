@@ -12,6 +12,39 @@ def ask_input
     gets.chomp
 end
 
+# get an option and validate it
+def select_option options
+  while true
+    i = 1
+    for option in options
+      puts "\t#{i}) #{option}"
+      i += 1
+    end
+
+    input = ask_input
+
+    if input.to_i >= 1 && < input.to_i <= options.length
+      return input
+    else
+      inform "'#{input}' no es una opción válida"
+    end
+  end
+end
+
+# Get an input, requesting it by 'request' string and validate it with a given block
+def request_input (request, &validation)
+  while true
+    puts request
+    input = ask_input
+
+    if validation.call(input)
+      return input
+    else
+      inform "'#{input}' no es una opción válida"
+    end
+  end
+end
+
 # -- Main Code ------------------- +
 class Client
     attr_reader  :persons_map, :actors_map, :directors_map, :movie_catalog, :categories_set, :user
