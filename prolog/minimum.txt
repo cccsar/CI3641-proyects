@@ -1,0 +1,156 @@
+Zack Snyder and Jared will present the new Justice League film today in HBO
+Alexs watches films.
+He likes books , music and films
+Carlos and Alex made a great project for class
+We will eat Bamboo Postres tomorrow , we eat at Comedores MYS today
+Carlos works with Alex while Daniel the gamer plays in the afternoon
+Carlos and Alex work while they play in the afternoon
+
+Observaciones: 
+    *Los tiempos gramaticales permitidos para las oraciones del parser son: presente, pasado simple y futuro
+    simple
+    *el parser recibira solamente oraciones con verbos lexicos
+    *solamente se permitira usar adverbios y preposiciones de tiempo, ubicacion, frecuencia, etc. en el predicado 
+    de la oracion y despues del objeto que recibe la accion del verbo
+
+-1) 
+Zack Snyder and Jared                    -> properN propperN conjunction propperN    | subject
+will present the new Justice League film -> aux verb prep adv propperN propperN noun | object
+today in HBO                             -> noun preposition propperN                   | object
+
+1)
+He             -> pronoun              | subject 
+likes books    -> verb noun            | object
+,              -> symbol               | separator
+music and film -> noun connective noun | final part of an object
+
+2) 
+Carlos and Alex      -> propperN conjunction propperN | Subject
+made a great project -> verb preposition adjetive noun      | object
+for class            -> preposition noun                    | final part of an object
+
+3)
+we                               -> pronoun                                                     | subject
+will eat bamboo postres tomorrow -> aux verb genivitive noun adverb / aux verb noun noun adverb | object
+,                                -> symbol                                                      | separator
+we                               -> pronoun                                                     | subject  
+eat at comedores MYS today       -> verb preposition noun adverb                                | object
+
+4)
+Carlos                 -> propperN                      | subject
+works with Alex        -> verb preposition noun         | object (p1) 
+while                  -> conjunction                   | link
+Daniel the gamer       -> noun article noun             | subject
+plays in the afternoon -> verb preposition article noun | object 
+
+5) 
+Carlos and Alex       -> propperN conjunction propperN       | subject
+play                  -> verb                                | object
+while                 -> connective                          | link 
+they                  -> pronoun                             | subject 
+play in the afternoon -> verb preposition article noun       | object
+
+
+early: from this breakdown I (superficially) conclude
+
+Subject     ::= Name | Subject Conjunction Subject | Article Subject    (I'm not that sure of the last one) 
+Name        ::= pronoun | PropperNoun 
+Article     ::= Definite | Indefinite
+
+
+Noun        ::= List of reckognized nouns
+PropperNoun ::= List of reckognized propper nouns
+Conjunction ::= 'and'
+Definite    ::= 'the'
+Indefinite  ::= 'a' | 'an'
+
+
+
+
+
+Sample parser of a subset of English
+
+Sentence    ::= NP VP
+
+NP          ::= Pronoun | ProperNoun | Determiner Nominal
+
+VP          ::= Verb | Verb NP | Verb NP PP | Verb PP
+
+PP          ::= Preposition NP
+
+Nominal     ::= Noun | Noun Nominal
+
+Noun        ::= "flight" | "breeze" | "trip" | "morning"
+
+Verb        ::= "is" | "prefer" | "like" | "need" | "want" | "fly"
+
+Pronoun     ::= "me" | "I" | "you" | "it"
+
+Determiner  ::= "the" | "a" | "an" | "this" | "these" | "that"
+
+Preposition ::= "from" | "to" | "on" | "near"
+
+ProperNoun  ::= "Alaska" | "Baltimore" | "Los Angeles" | "Chicago"
+
+
+Another grammar (actually they're the phrase structure rules for a subset of english) 
+S —> NP VP
+NP —> (D) (A*) N ({PP,S}*)
+VP —> V (NP*) (AP) ({PP,S}*)
+PP —> P NP
+AP —> (Adv*) A ({PP,S}*)
+
+
+we produce: 
+
+Sentence    ::= Clause | Clause (',' Clause)
+
+Clause      ::= NP Timed | TPNP TPVP 
+
+Timed       ::= 'will' VP 
+
+NP          ::= Pronoun | Name | Name Determiner Noun * | Determiner Noun | Determiner Describer NP | Describer NP | NP ('and' NP)
+
+TPNP        ::= TPPronoun | Name | Name Determiner Noun * | Determiner Noun | Determiner Describer NP | Describer NP | NP ('and' NP)
+
+VP          ::= Verb | Verb NP PP | Verb NP | Verb PP | Verb NP AP | Verb Listing
+
+TPVP        ::= Verb | Verb NP PP | Verb NP | Verb PP | Verb NP AP | Verb Listing
+
+Listing     ::= Noun ',' Listing | Nound 'and' Noun 
+
+PP          ::= Preposition NP
+
+
+Describer   ::= Adjective | Adjective Describer
+
+Name        ::= PropperNoun | ProperNoun Name
+
+PropperNoun ::= Uletter Word
+
+Word        ::= letter | letter word  
+
+Noun        ::= nounParticle | nounParticle 's' 
+
+
+Determiner  ::= 'the' | 'a' | 'an' | 'this' | 'these' | 'that'
+
+RemPronoun ::= 'I' | 'you' | 'He' | 'She' | 'It' | 'We' | 'They' 
+
+TPPronoun ::= 'he' | 'she' | 'it'
+
+Adjective   ::= 'great' | 'new' | 'yello' .. etc
+
+Preposition ::= 'in' | 'for' | 'at' | 'with' | 'from' | 'to' | 'on' | 'near'
+
+letter      ::= a | b | .. | z
+
+Uletter     ::= A | B | .. | Z
+
+NounParticle ::= 'book' | 'music' | 'film' | 'project' | 'class' | 'gamer' | 'afternoon'
+
+Verb         ::= 'go' | 'present' | 'like' | 'eat' | 'work' | 'play' | 'went' | 'presented' | 'liked' | 'ate' | 'worked' | 'played'
+
+TPVerb       ::= 'goes' | 'presents' | 'likes' | 'eats' | 'works' | 'plays' 
+
+// whitespace separator implied
