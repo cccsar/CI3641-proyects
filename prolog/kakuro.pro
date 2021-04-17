@@ -1,4 +1,3 @@
-readKakuro(Kakuro) :- open("kakuro.txt", read, Strm), read(Strm, Kakuro).
 /*
     Descripciones:
         blank(Col,Row)
@@ -34,13 +33,6 @@ checkFrec([X | T], L) :- frec(X, L, N), N =< 2, checkFrec([T], L).
 blanks([], []).
 blanks([clue(_,_,_, Blanks) | MoreClues], AllBlanks) :- blanks(MoreClues, SomeBlanks), append(Blanks, SomeBlanks, AllBlanks). 
 
-% Indica que cada celda tenga máximo 2 clues
-noMoreThanTwoCluesSameCell([]).
-noMoreThanTwoCluesSameCell(Clues) :- cluePositions(Clues, Positions), checkFrec(Positions, Positions).
-
-% Indica que no existen clues repetidas en los blanks de otras clues
-noClueInSomeBlanks(Clues) :- blanks(Clues, Blanks), cluePositions(Clues, Cells), intersection(Cells, Blanks, []).
-
 % Obtiene las filas de una lista de blank
 rows([], []).
 rows([blank(_, Row) | MoreBlanks], [Row | MoreRows]) :- rows(MoreBlanks, MoreRows).
@@ -56,6 +48,19 @@ allInRange([X | L], Lower, Upper) :- Lower =< X, X =< Upper, allInRange(L,Lower,
 % get sum of numbers in range [l, r]
 sumInRange(L, R, Sum) :- S1 is R * (R + 1) / 2, S2 is (L - 1) * (L) / 2, Sum is S1 - S2.
 
+% Obtiene el producto cartesiano de dos listas ignorando los reflexivos
+
+
+%--- Funciones principales de chequeo ---%
+
+% Indica que cada celda tenga máximo 2 clues
+noMoreThanTwoCluesSameCell([]).
+noMoreThanTwoCluesSameCell(Clues) :- cluePositions(Clues, Positions), checkFrec(Positions, Positions).
+
+% Indica que no existen clues repetidas en los blanks de otras clues
+noClueInSomeBlanks(Clues) :- blanks(Clues, Blanks), cluePositions(Clues, Cells), intersection(Cells, Blanks, []).
+
+
 % Indica si los blanks de una clue estan en linea recta respecto a la clue 
 blanksInRow(clue(Col,Row,_, Blanks)) :- rows(Blanks, Rows),             % get rows
                                         union([Row], Rows, [Row]),      % check that they're all in the same row
@@ -66,8 +71,7 @@ blanksInRow(clue(Col,Row,_, Blanks)) :- rows(Blanks, Rows),             % get ro
                                         Upper is Col + NBlanks,         % get upper bound
                                         sumInRange(Lower, Upper, Sum),  % Calcula suma entre inferior y superior
                                         sum_list(Cols, Sum).            % Revisa que todos los elementos sean distintos
-
-% Indica si los blanks de una clue estan en linea recta respecto a la clue 
+ 
 blanksInRow(clue(Col,Row,_, Blanks)) :- rows(Blanks, Rows),             % get rows
                                         union([Col], Cols, [Col]),      % check that they're all in the same Col
                                         cols(Blanks, Cols),             % Get cols
@@ -78,7 +82,19 @@ blanksInRow(clue(Col,Row,_, Blanks)) :- rows(Blanks, Rows),             % get ro
                                         sumInRange(Lower, Upper, Sum),  % Calcula suma entre inferior y superior
                                         sum_list(Rows, Sum).            % Revisa que todos los elementos sean distintos
 
+
+
+
 % Revisa si un kakuro es valido y la solucion dada resuelve el kakuro
-valid(Kakuro, Solution) :- noMoreThanTwoCluesSameCell(Kakuro), noClueInSomeBlanks(Kakuro).
+valid(Kakuro, Solution) :- noMoreThanTwoCluesSameCell(Kakuro), noClueInSomeBlanks(Kakuro), blanksInRow(Kakuro).
 
 
+
+% read some kakuro
+openKakuro(Kakuro) :-   open("kakuro.txt", read, Strm),
+                        read(Strm, Kakuro).
+
+readKakuro(Kakuro) :-   write("Dame un archivo para leer: "),
+                        nl,
+                        read(File),
+                        openKakuro(Kakuro).
