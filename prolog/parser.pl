@@ -1,4 +1,3 @@
-
 expr --> term.
 expr --> term, [+], expr.
 expr --> term, [-], expr.
@@ -12,37 +11,38 @@ parse(E) :- expr(E, []).
 /* string_lower/2 , string_upper/2 
  * current_predicate/1
  * atom_string/2 , string_chars/2
+ * split_string/4
+ * char_code/2, between/3
+ * string_codes/2
  */
 
+name --> [N], { is_propper_noun(N) }.
+name --> [N], { is_propper_noun(N) }, name.
+remPronouns --> [N], { member(N,['i','you','he','she','it','we','they','I','You','He','She','It','We','They']) } 
 
-whitespace(X) :- member(X,[' ','\n','\t','\r']), !. 
 
-takeWhileChar([X|XS],Y) :- not(whitespace(X)), !, append(Y,[X],R), !, takeWhileChar(XS,R).
+my_parse(E) :- name(E,[]).
 
-pack([],X) :- !.
-pack([X|XS], []) :- whitespace(X), !,pack([XS],[]). 
-pack([X|XS], []) :- pack([XS],[[X]]).
-pack([X,D|XS], [YS|ZS]) :- 
-    not(whitespace(X)),
-    whitespace(D),  
-    append(YS,[X],R),
-    append(ZS,[R],P),
-    pack(XS,P).
-pack([X,D|XS], [Y|YS]) :- 
-    not(whitespace(X)),
-    not(whitespace(D)), 
-    append(Y,[X],R),
-    append([R],YS,P),
-    pack([D|XS],P).
-pack([X,D|XS], ZS) :- 
-    whitespace(X),
-    whitespace(D),
-    pack([XS],ZS).
-pack([X],[Y|YS]) :- 
-    whitespace(X),
-    pack([],[Y|YS]).
-pack([X],[Y|YS]) :-
-    not(whitespace(x)),
-    append(Y,[X],R),
-    append(YS,R,P),
-    pack([],P).
+is_propper_noun(X)　:- 
+    atom_codes(X,[Y|YS]),
+    check_range([Y],65,90), %initial uppercased
+    check_range(YS,97,122). %remaining lowercased
+
+% Checks that a string's characters are on some range
+check_range([],_,_).
+check_range([X|XS],U,B) :-
+    between(U,B,X),
+    check_range(XS,U,B).
+ 
+main(X) :- 
+    split_string(X," \n\t\r"," \n\t\r",L),
+    string_to_atoms(L,[],R),
+    my_parse(R),
+    write(R), !.
+    
+string_to_atoms([X|XS],Y,Q) :-
+    %string_lower(X,I), no hizo falta porque el atomo de "PRUEBA" seria 'PRUEBA' 
+    atom_string(P,X),
+    append(Y,[P],R),
+    string_to_atoms(XS,R,Q).
+string_to_atoms([],Y,Y) .

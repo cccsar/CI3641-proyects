@@ -109,7 +109,7 @@ Clause      ::= NP Timed | TPNP TPVP
 
 Timed       ::= 'will' VP 
 
-NP          ::= Pronoun | Name | Name Determiner Noun * | Determiner Noun | Determiner Describer NP | Describer NP | NP ('and' NP)
+NP          ::= remPronoun | Name | Name Determiner Noun * | Determiner Noun | Determiner Describer NP | Describer NP | NP ('and' NP)
 
 TPNP        ::= TPPronoun | Name | Name Determiner Noun * | Determiner Noun | Determiner Describer NP | Describer NP | NP ('and' NP)
 
@@ -130,7 +130,7 @@ PropperNoun ::= Uletter Word
 
 Word        ::= letter | letter word  
 
-Noun        ::= nounParticle | nounParticle 's' 
+Noun        ::= NounParticle | NounParticle 's' 
 
 
 Determiner  ::= 'the' | 'a' | 'an' | 'this' | 'these' | 'that'
