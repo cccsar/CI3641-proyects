@@ -91,10 +91,10 @@ valid(Kakuro, Solution) :- noMoreThanTwoCluesSameCell(Kakuro), noClueInSomeBlank
 
 
 % read some kakuro
-openKakuro(Kakuro) :-   open("kakuro.txt", read, Strm),
-                        read(Strm, Kakuro).
+openKakuro(Kakuro, FileToOpen) :-   open(FileToOpen, read, Strm),
+                                    read(Strm, Kakuro).
 
 readKakuro(Kakuro) :-   write("Dame un archivo para leer: "),
                         nl,
                         read(File),
-                        openKakuro(Kakuro).
+                        openKakuro(Kakuro, File).
