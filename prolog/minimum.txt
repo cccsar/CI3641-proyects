@@ -113,44 +113,47 @@ NP          ::= remPronoun | Name | Name Determiner Noun * | Determiner Noun | D
 
 TPNP        ::= TPPronoun | Name | Name Determiner Noun * | Determiner Noun | Determiner Describer NP | Describer NP | NP ('and' NP)
 
-VP          ::= Verb | Verb NP PP | Verb NP | Verb PP | Verb NP AP | Verb Listing
+#VP          ::= Verb | Verb NP PP | Verb NP | Verb PP | Verb NP AP | Verb Listing
 
-TPVP        ::= Verb | Verb NP PP | Verb NP | Verb PP | Verb NP AP | Verb Listing
+TPVP        ::= TPVerb | TPVerb NP PP | TPVerb NP | TPVerb PP | TPVerb NP AP | TPVerb Listing
 
-Listing     ::= Noun ',' Listing | Nound 'and' Noun 
+*Listing     ::= Noun ',' Listing | Noun 'and' Listing 
 
-PP          ::= Preposition NP
+*PP          ::= Preposition NP 
 
-
-Describer   ::= Adjective | Adjective Describer
-
-Name        ::= PropperNoun | ProperNoun Name
-
-PropperNoun ::= Uletter Word
-
-Word        ::= letter | letter word  
-
-Noun        ::= NounParticle | NounParticle 's' 
+*AP           ::= Adverb | Describer Adverb
 
 
-Determiner  ::= 'the' | 'a' | 'an' | 'this' | 'these' | 'that'
+*Describer   ::= Adjective | Adjective Describer
 
-RemPronoun ::= 'I' | 'you' | 'He' | 'She' | 'It' | 'We' | 'They' 
+*Name        ::= PropperNoun | ProperNoun Name
 
-TPPronoun ::= 'he' | 'she' | 'it'
+*PropperNoun ::= Uletter Word
 
-Adjective   ::= 'great' | 'new' | 'yello' .. etc
+*Word        ::= letter | letter word  
 
-Preposition ::= 'in' | 'for' | 'at' | 'with' | 'from' | 'to' | 'on' | 'near'
+*Noun        ::= NounParticle | NounParticle 's' 
 
-letter      ::= a | b | .. | z
+*Adverb      ::= 'Tomorrow' | 'Today'
 
-Uletter     ::= A | B | .. | Z
+*Determiner  ::= 'the' | 'a' | 'an' | 'this' | 'these' | 'that'
 
-NounParticle ::= 'book' | 'music' | 'film' | 'project' | 'class' | 'gamer' | 'afternoon'
+*RemPronoun ::= 'I' | 'i' | 'You' | 'you' | 'He' | 'he' | 'She' | 'she' | 'It' | 'it' | 'We' | 'we' | 'They' | 'they'
 
-Verb         ::= 'go' | 'present' | 'like' | 'eat' | 'work' | 'play' | 'went' | 'presented' | 'liked' | 'ate' | 'worked' | 'played'
+*TPPronoun ::= 'He' | 'he' | 'She' | 'she' | 'It' | 'it'
 
-TPVerb       ::= 'goes' | 'presents' | 'likes' | 'eats' | 'works' | 'plays' 
+*Adjective   ::= 'great' | 'new' | 'yello' .. etc
+
+*Preposition ::= 'in' | 'for' | 'at' | 'with' | 'from' | 'to' | 'on' | 'near'
+
+*letter      ::= a | b | .. | z
+
+*Uletter     ::= A | B | .. | Z
+
+*NounParticle ::= 'book' | 'music' | 'film' | 'project' | 'class' | 'gamer' | 'afternoon'
+
+*Verb         ::= 'go' | 'present' | 'like' | 'eat' | 'work' | 'play' | 'went' | 'presented' | 'liked' | 'ate' | 'worked' | 'played'
+
+*TPVerb       ::= 'goes' | 'presents' | 'likes' | 'eats' | 'works' | 'plays' 
 
 // whitespace separator implied
