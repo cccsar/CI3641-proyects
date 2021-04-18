@@ -1,86 +1,103 @@
-/* string_lower/2 , string_upper/2 
- * current_predicate/1
- * atom_string/2 , string_chars/2
- * split_string/4
- * char_code/2, between/3
- * string_codes/2
- * atom_prefix/2, atom_concat/3, atom_length
- * downcase_atom/2, upcase_atom/2
- * sub_atom_icasechk/3
- */
-
 main(X) :- 
     split_string(X," \n\t\r"," \n\t\r",L),
     string_to_atoms(L,[],R),
-    my_parse(R),
-    write(R), !.
+    my_parse(AST,R),
+    write(AST), !.
 
-% reckognized \
+% pasando
+% Alex watches films
+% he likes books , movies and films
+% # Carlos and Alex made a great project for class
 
-describer --> adjective, describer.
-describer --> adjective.
 
-name --> [N], { nameCheck(N) }.
-name --> [N], { nameCheck(N) }, name.
+my_parse(X) :- adverb(X,[]).
 
-noun --> [N], { member(N,['book','music','film','project','class','gamer','aternoon']) }. 
-noun --> [N], { atom_concat(X,s,N), member(X,['book','music','film','project','class','gamer','aternoon']) }.
+% Non terminals
 
-%%% pronouns \
-tpPronouns --> [N], { member(N,[he,she,it]) }.
-tpPronouns --> [N], { nameCheck(N), downcase_atom(N,T), member(T,[he,she,it]) }.
+sentence    --> claus.
+sentence    --> claus, [,], claus.
+
+claus       --> tpNp, tpVp.
+claus       --> remNp,timed.
+claus       --> remNp.
+
+timed       --> vp.          
+timed       --> [will], vp.
+
+vp          --> verb.
+vp          --> verb, conjunctor.
+vp          --> verb, pp.
+vp          --> verb, both.
+%vp          --> verb, both, ap.
+%vp          --> verb, both, pp.
+
+tpVp        --> tpVerb.
+tpVp        --> tpVerb, both.
+tpVp        --> tpVerb, conjunctor.
+tpVp        --> tpVerb, pp.
+%tpVp        --> tpVerb, both, ap.
+%tpVp        --> tpVerb, both, pp.
+
+both        --> remPronouns.
+both        --> tpPronouns.
+both        --> commonNp.
+
+remNp       --> remPronouns.
+remNp       --> commonNp.
+
+tpNp        --> tpPronouns.
+tpNp        --> commonNp.
+
+commonNp    --> conjunctor. % this is exceptional
+commonNp    --> name.
+commonNp    --> name, determiner, noun. % this is exceptional
+commonNp    --> determiner, noun.
+commonNp    --> determiner, describer, commonNp.
+%commonNp    --> describer, commonNp. 
+
+pp          --> preposition, both.
+
+ap          --> describer.
+ap          --> adverb, describer.
+
+describer   --> adjective, describer.
+describer   --> adjective.
+
+conjunctor  --> nominal, [and], conjunctor.
+conjunctor  --> nominal, [,], conjunctor.
+conjunctor  --> nominal.
+
+nominal     --> noun.
+nominal     --> name.
+
+% Terminals
+name        --> [N], { downcase_atom(N,T), not(member(T,[i,she,he,you,we,they])),nameCheck(N) }.
+name        --> [N], { downcase_atom(N,T), not(member(T,[i,she,he,you,we,they])),nameCheck(N) }, name.
+
+noun        --> [N], { member(N,[movie,book,music,film,project,class,gamer,afternoon]) }. 
+noun        --> [N], { atom_concat(X,s,N), member(X,[movie,book,music,film,project,class,gamer,afternoon]) }.
+
+tpPronouns  --> [N], { member(N,[he,she,it]) }.
+tpPronouns  --> [N], { nameCheck(N), downcase_atom(N,T), member(T,[he,she,it]) }.
 
 remPronouns --> [N], { member(N,[i,you,we,they]) }.
 remPronouns --> [N], { nameCheck(N), downcase_atom(N,T), member(T,[i,you,we,they]) }.
-%%% pronouns /
 
-list_stuff --> noun, [and], list_stuff.
-list_stuff --> noun, [,], list_stuff.
-list_stuff --> noun.
+verb        --> [V], { member(V,[go,present,like,eat,work,make,play,watch,went,presented,liked,ate,worked,made,played,watched]) }.
 
-verb --> [V], { member(V,[go,present,like,eat,work,play,went,presented,liked,ate,worked,played]) }.
-tpVerb --> [V], { member(V,[goes,presents,likes,eats,works,plays]) }.
+tpVerb      --> [V], { member(V,[goes,presents,likes,eats,works,plays,watches]) }.
 
 preposition --> [P], { member(P,[in,for,at,with,from,to,on,near]) }.
 
-adjective --> [A], { member(A,[great,new,yellow]) }.
+adjective   --> [A], { member(A,[great,new,yellow]) }.
 
-determiner --> [D], { member(D,[the,a,an,this,these,that]) }. 
+determiner  --> [D], { member(D,[the,a,an,this,these,that]) }. 
 
-adverb --> [A], { member(A,[today,tomorrow]) }.
-% reckognized /
+adverb      --> [Adv], { member(Adv,[today,tomorrow]) }.
 
 
-np --> remPronouns.
-np --> noun. % this is exceptional
-np --> name.
-np --> name, determiner, noun. % this is exceptional
-np --> determiner, noun.
-np --> determiner, describer, np.
-np --> describer, np. 
-np --> np,[and],np.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-pp --> preposition, np.
-
-vp --> verb.
-vp --> verb, np,ap.
-vp --> verb, np, pp.
-vp --> verb, np.
-vp --> verb, pp.
-vp --> verb, pp.
-vp --> vp,listing.
-
-ap --> adverb.
-ap --> describer, adverb.
-
-timed --> [will], vp.
-
-claus --> np,timed.
-
-sentence --> claus.
-sentence --> claus, [,], claus.
-
-my_parse(E) :- sentence(E,[]). 
 
 % Checks an atom form is like a name: First letter uppercased, remaining lowercased.
 nameCheck(NAME) :- 
@@ -104,3 +121,26 @@ string_to_atoms([X|XS],Y,Q) :-
     append(Y,[P],R),
     string_to_atoms(XS,R,Q).
 string_to_atoms([],Y,Y) .
+
+
+/* string_lower/2 , string_upper/2 
+ * current_predicate/1
+ * atom_string/2 , string_chars/2
+ * split_string/4
+ * char_code/2, between/3
+ * string_codes/2
+ * atom_prefix/2, atom_concat/3, atom_length
+ * downcase_atom/2, upcase_atom/2
+ * sub_atom_icasechk/3
+ */
+
+/*
+ * Zack Snyder and Jared will present the new Justice League film today in HBO
+ * Alexs watches films.
+ * He likes books , music and films
+ * Carlos and Alex made a great project for class
+ * We will eat Bamboo Postres tomorrow , we eat at Comedores MYS today
+ * Carlos works with Alex while Daniel the gamer plays in the afternoon
+ * Carlos and Alex work while they play in the afternoon
+ *
+ */

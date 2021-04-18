@@ -103,19 +103,19 @@ AP —> (Adv*) A ({PP,S}*)
 
 we produce: 
 
-Sentence    ::= Clause | Clause (',' Clause)
+*Sentence    ::= Clause | Clause (',' Clause)
 
-Clause      ::= NP Timed | TPNP TPVP 
+*Clause      ::= NP Timed | TPNP TPVP 
 
-Timed       ::= 'will' VP 
+*Timed       ::= 'will' VP  | VP 
 
-NP          ::= remPronoun | Name | Name Determiner Noun * | Determiner Noun | Determiner Describer NP | Describer NP | NP ('and' NP)
+*NP          ::= remPronoun | Name | Name Determiner Noun * | Determiner Noun | Determiner Describer NP | Describer NP | NP ('and' NP)
 
-TPNP        ::= TPPronoun | Name | Name Determiner Noun * | Determiner Noun | Determiner Describer NP | Describer NP | NP ('and' NP)
+*TPNP        ::= TPPronoun | Name | Name Determiner Noun * | Determiner Noun | Determiner Describer NP | Describer NP | NP ('and' NP)
 
-#VP          ::= Verb | Verb NP PP | Verb NP | Verb PP | Verb NP AP | Verb Listing
+*VP          ::= Verb | Verb NP PP | Verb NP | Verb PP | Verb NP AP | Verb Listing
 
-TPVP        ::= TPVerb | TPVerb NP PP | TPVerb NP | TPVerb PP | TPVerb NP AP | TPVerb Listing
+*TPVP        ::= TPVerb | TPVerb NP PP | TPVerb NP | TPVerb PP | TPVerb NP AP | TPVerb Listing
 
 *Listing     ::= Noun ',' Listing | Noun 'and' Listing 
 
