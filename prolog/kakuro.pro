@@ -180,7 +180,7 @@ fillSum([fill(_, V) | Fs], N) :- fillSum(Fs, M), N is M + V.
 allIn([], _).
 allIn([X | Xs], L) :- member(X, L), allIn(Xs, L).
 
-solMatch([], _).
+solMatch([], _).                                    % EL PROBLEMA ESTA EN ESTE SOLMATCH
 solMatch([clue(_,_,V, Blanks) | Clues], Fills) :-   %write(Blanks), write(" V "), write(V), write(" "), write(Joined), nl,
                                                     blankJoin(Blanks, Fills, Joined), 
                                                     checkFillValues(Joined),
