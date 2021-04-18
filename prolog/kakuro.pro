@@ -23,7 +23,7 @@ cluePositions([clue(Col, Row, _, _) | CluesTail], [blank(Col, Row) | CellsTail ]
 % frecuencia de un elemento en una lista
 frec(_, [], 0).
 frec(X, [X | T], N) :- frec(X, T, M), N is M + 1.
-frec(X, [_| T], N)  :- frec(X, T, N).
+frec(X, [Y| T], N)  :- frec(X, T, N), X\=Y.
 
 % Revisa que no hayan duplicados
 noDuplicates([]).
@@ -167,11 +167,16 @@ fillSum([], 0).
 fillSum([fill(_, V) | Fs], N) :- fillSum(Fs, M), N is M + V.
 
 % indica si las fills de una solución satisfacen a las Clues de un kakuro
+allIn([X | Xs], L) :- member(X, L), allIn(Xs, L).
+allIn([], _).
+
 solMatch([], _).
-solMatch([clue(_,_,V, Blanks) | Clues], Fills) :- blankJoin(Blanks, Fills, Joined), fillSum(Joined, V), 
-                                                  getSolBlanks(Fills, SolBlanks),
-                                                  subset(Blanks, SolBlanks),
-                                                  solMatch(Clues, Fills).
+solMatch([clue(_,_,V, Blanks) | Clues], Fills) :-   blankJoin(Blanks, Fills, Joined), 
+                                                    getSolBlanks(Fills, SolBlanks),
+                                                    write("aaaa"), nl,
+                                                    allIn(Blanks, SolBlanks),
+                                                    fillSum(Joined, V), 
+                                                    solMatch(Clues, Fills).
 
                  
 
@@ -192,9 +197,9 @@ blanksAligned([Clue | MoreClues]) :- (blanksInCol(Clue); blanksInRow(Clue)), bla
 solutionWorks(Clues, Solution) :-   checkFillValues(Solution),
                                     checkSolDifferentBlanks(Solution),
                                     checkFills(Solution, Clues),
-                                    solMatch(Clues, Solution),
-                                write("ok i think"), nl.
-
+                                    write(Solution), nl,
+                                    solMatch(Clues, Solution)
+                                    .
 
 % Revisa si un kakuro es valido y la solucion dada resuelve el kakuro
 valid(kakuro(Clues), Solution) :-   
