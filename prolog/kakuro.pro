@@ -16,6 +16,14 @@
             + checkFrec(L1, L2)> revisa que los elementos de L1  no aparezcan más de 2 veces en L2
 */
 
+% Check if all elements are distinct
+daff(X) :- 
+    list_to_set(X,S),
+    length(X,N),
+    length(S,M),
+    M =:= N.
+
+
 % clues positions as cells
 cluePositions([], []).
 cluePositions([clue(Col, Row, _, _) | CluesTail], [blank(Col, Row) | CellsTail ]) :- cluePositions(CluesTail, CellsTail). 
@@ -94,7 +102,6 @@ cross([X | XS], YS, All) :- mkPairs(X, YS, WX), cross(XS, YS, WT), append(WX, WT
 noSym([], []).
 noSym([pair(X,X) | Ps], NoSymPs) :- noSym(Ps, NoSymPs).
 noSym([pair(X,Y) | Ps], [pair(X,Y) | NoSymPs]) :- 
-    write("aaaa"), nl,
     noSym(Ps, NoSymPs).
 
 %   Revisa si todos los apres de clues en una lista comparten a lo sumo una celda en sus blanks
@@ -120,10 +127,10 @@ getSolBlanks([fill(B, _) | Fs], [B | MoreBlanks]) :- getSolBlanks(Fs, MoreBlanks
 
 % revisa que los blanks de una solucion sean todos distintos
 fillDiffToAll(_, []).
-fillDiffToAll(fill(blank(A,B), V), [ fill(blank(C,D), _) |Fs]) :- A \= C, B \= D, fillDiffToAll(fill(blank(A,B), V), Fs).
+fillDiffToAll(fill(blank(A,B), V), [ fill(blank(C,D), _) |Fs]) :- write("aaa"),nl, (A \= C ; B \= D), fillDiffToAll(fill(blank(A,B), V), Fs).
 
 checkSolDifferentBlanks([]).
-checkSolDifferentBlanks([F | Fs]) :- fillDiffToAll(F, Fs), checkSolDifferentBlanks(Fs). 
+checkSolDifferentBlanks(Fills) :- getSolBlanks(Fills, Blanks), daff(Blanks). 
 
 % revisa que no hayan pares con el mismo numero en la misma blank
 checkSolPairNotInSameClue(_, []).
@@ -141,13 +148,13 @@ checkFillsPairsOk([P1 | Ps], Clues) :- checkSolPairNotInSameClue(P1, Clues),
                                        checkFillsPairsOk(Ps, Clues).
 
 % Revisa que una lista fills no tenga dos elementos con el mismo valor en la misma clue
-checkFillsHelper(fill(blank(A,B), V), [fill(_, W) | Fs]) :- V \= W, checkFillsHelper(fill(blank(A,B), V), Fs).
 checkFillsHelper(_, []).
+checkFillsHelper(fill(blank(A,B), V), [fill(_, W) | Fs]) :- V \= W, checkFillsHelper(fill(blank(A,B), V), Fs).
 
-checkFillsHelperClues(Fill, Fills, [clue(_,_,_, Blanks), Clues]) :-   blankJoin(Blanks, Fills, Joined), 
+checkFillsHelperClues(_,_,[]).
+checkFillsHelperClues(Fill, Fills, [clue(_,_,_, Blanks), Clues]) :- blankJoin(Blanks, Fills, Joined), 
                                                                     checkFillsHelper(Fill, Joined),
                                                                     checkFillsHelperClues(Fill, Fills, Clues).
-checkFillsHelperClues(_,_,[]).
 
 checkFills([], _).
 checkFills(_, []).
@@ -167,6 +174,7 @@ fillSum([], 0).
 fillSum([fill(_, V) | Fs], N) :- fillSum(Fs, M), N is M + V.
 
 % indica si las fills de una solución satisfacen a las Clues de un kakuro
+
 allIn([X | Xs], L) :- member(X, L), allIn(Xs, L).
 allIn([], _).
 
@@ -194,7 +202,12 @@ noClueInSomeBlanks(Clues) :- blanks(Clues, Blanks), cluePositions(Clues, Cells),
 blanksAligned([]).
 blanksAligned([Clue | MoreClues]) :- (blanksInCol(Clue); blanksInRow(Clue)), blanksAligned(MoreClues).
 
-solutionWorks(Clues, Solution) :-   checkFillValues(Solution),
+solutionWorks(Clues, Solution) :-   
+                                    blanks(Clues, Blanks),
+                                    list_to_set(Blanks, UniqueBlanks),
+                                    length(UniqueBlanks, N),
+                                    length(Solution, N),
+                                    checkFillValues(Solution),
                                     checkSolDifferentBlanks(Solution),
                                     checkFills(Solution, Clues),
                                     write(Solution), nl,
