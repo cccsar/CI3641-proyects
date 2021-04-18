@@ -25,6 +25,10 @@ frec(_, [], 0).
 frec(X, [X | T], N) :- frec(X, T, M), N is M + 1.
 frec(X, [_| T], N)  :- frec(X, T, N).
 
+% Revisa que no hayan duplicados
+noDuplicates([]).
+noDuplicates([X | Xs]) :- frec(X, Xs, 0), noDuplicates(Xs).
+
 % Indica los elementos de la primera lista aparecen menos de dos veces en la lista L
 checkFrec([], _).
 checkFrec(_, []).
@@ -89,15 +93,87 @@ cross([X | XS], YS, All) :- mkPairs(X, YS, WX), cross(XS, YS, WT), append(WX, WT
 %   elimina los simetricos
 noSym([], []).
 noSym([pair(X,X) | Ps], NoSymPs) :- noSym(Ps, NoSymPs).
-noSym([pair(X,Y) | Ps], [pair(X,Y) | NoSymPs]) :- noSym(Ps, NoSymPs).
+noSym([pair(X,Y) | Ps], [pair(X,Y) | NoSymPs]) :- 
+    write("aaaa"), nl,
+    noSym(Ps, NoSymPs).
 
 %   Revisa si todos los apres de clues en una lista comparten a lo sumo una celda en sus blanks
+almostDisjointBlanksHelper(_, []).
+almostDisjointBlanksHelper(clue(X,Y,V, B1), [clue(_,_,_, B2) |Clues]) :- intersection(B1, B2, Inter), 
+                                                                          length(Inter, N),
+                                                                          N =< 1,
+                                                                          almostDisjointBlanksHelper(clue(X,Y,V, B1), Clues).
+
+
 almostDisjointBlanks([]).
-almostDisjointBlanks([ pair(clue(_, _, _, B1), clue(_,_,_, B2)) | Ps]) :-  intersection(B1, B2, Inter),
-                                                                            length(Inter, N),
-                                                                            N =< 1,
-                                                                            almostDisjointBlanks(Ps).
-                                                                            
+almostDisjointBlanks([ Clue | Clues ]) :-   almostDisjointBlanksHelper(Clue, Clues),
+                                            almostDisjointBlanks(Clues).
+
+% Revisamos que los fill esten bien escritos
+checkFillValues([]).
+checkFillValues([fill(blank(_,_), X ) | Fs]) :- member(X, [1,2,3,4,5,6,7,8,9]), checkFillValues(Fs).
+
+% Obtiene los blanks de una solucion
+getSolBlanks([], []).
+getSolBlanks([fill(B, _) | Fs], [B | MoreBlanks]) :- getSolBlanks(Fs, MoreBlanks).
+
+
+% revisa que los blanks de una solucion sean todos distintos
+fillDiffToAll(_, []).
+fillDiffToAll(fill(blank(A,B), V), [ fill(blank(C,D), _) |Fs]) :- A \= C, B \= D, fillDiffToAll(fill(blank(A,B), V), Fs).
+
+checkSolDifferentBlanks([]).
+checkSolDifferentBlanks([F | Fs]) :- fillDiffToAll(F, Fs), checkSolDifferentBlanks(Fs). 
+
+% revisa que no hayan pares con el mismo numero en la misma blank
+checkSolPairNotInSameClue(_, []).
+checkSolPairNotInSameClue(pair( fill(Blank1, Val1), fill(Blank2, Val2)), [clue(_,_,_, Blanks) | Clues]) :-
+    ( 
+        
+        not(member(Blank1, Blanks)) ;
+        not(member(Blank2, Blanks)) ;
+        Val1 \= Val2
+    ),
+    checkSolPairNotInSameClue(pair( fill(Blank1, Val1), fill(Blank2, Val2)), Clues).
+
+% revisa que los pares de una lista de pares de fills esten todos bien respecto a una lista de clues
+checkFillsPairsOk([P1 | Ps], Clues) :- checkSolPairNotInSameClue(P1, Clues), 
+                                       checkFillsPairsOk(Ps, Clues).
+
+% Revisa que una lista fills no tenga dos elementos con el mismo valor en la misma clue
+checkFillsHelper(fill(blank(A,B), V), [fill(_, W) | Fs]) :- V \= W, checkFillsHelper(fill(blank(A,B), V), Fs).
+checkFillsHelper(_, []).
+
+checkFillsHelperClues(Fill, Fills, [clue(_,_,_, Blanks), Clues]) :-   blankJoin(Blanks, Fills, Joined), 
+                                                                    checkFillsHelper(Fill, Joined),
+                                                                    checkFillsHelperClues(Fill, Fills, Clues).
+checkFillsHelperClues(_,_,[]).
+
+checkFills([], _).
+checkFills(_, []).
+checkFills([Fill | Fills], Clues) :- checkFillsHelperClues(Fill, Fills, Clues),
+                                     checkFills(Fills, Clues).
+    
+    
+
+
+% retorna los fills que pertenecen a la lista de blanks dada
+blankJoin([], _, []).
+blankJoin(_, [], []).
+blankJoin(Blanks, [fill(Blank, V) | Fs], [fill(Blank, V) | Joined]) :- member(Blank, Blanks), blankJoin(Blanks, Fs, Joined).
+
+% returna la suma de una lista de fill
+fillSum([], 0).
+fillSum([fill(_, V) | Fs], N) :- fillSum(Fs, M), N is M + V.
+
+% indica si las fills de una solución satisfacen a las Clues de un kakuro
+solMatch([], _).
+solMatch([clue(_,_,V, Blanks) | Clues], Fills) :- blankJoin(Blanks, Fills, Joined), fillSum(Joined, V), 
+                                                  getSolBlanks(Fills, SolBlanks),
+                                                  subset(Blanks, SolBlanks),
+                                                  solMatch(Clues, Fills).
+
+                 
 
 
 %--- Funciones principales de chequeo ---%
@@ -113,19 +189,20 @@ noClueInSomeBlanks(Clues) :- blanks(Clues, Blanks), cluePositions(Clues, Cells),
 blanksAligned([]).
 blanksAligned([Clue | MoreClues]) :- (blanksInCol(Clue); blanksInRow(Clue)), blanksAligned(MoreClues).
 
-% Indica si para cualesquiera dos pares de clues, comparten a lo sumo una celda en sus blanks
-notOverlappingBlanks(Clues) :-  cross(Clues, Clues, Cross), 
-                                noSym(Cross, NoSym),
-                                write("todo bien"), nl,
-                                almostDisjointBlanks(NoSym).
+solutionWorks(Clues, Solution) :-   checkFillValues(Solution),
+                                    checkSolDifferentBlanks(Solution),
+                                    checkFills(Solution, Clues),
+                                    solMatch(Clues, Solution),
+                                write("ok i think"), nl.
+
 
 % Revisa si un kakuro es valido y la solucion dada resuelve el kakuro
-valid(kakuro(Clues), Solution) :-   noMoreThanTwoCluesSameCell(Clues), 
+valid(kakuro(Clues), Solution) :-   
+    noMoreThanTwoCluesSameCell(Clues), 
                                     noClueInSomeBlanks(Clues), 
                                     blanksAligned(Clues),
-                                    notOverlappingBlanks(Clues).
-
-
+                                    almostDisjointBlanks(Clues), 
+                                    solutionWorks(Clues, Solution).
 
 % read some kakuro
 openKakuro(Kakuro, FileToOpen) :-   open(FileToOpen, read, Strm),
