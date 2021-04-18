@@ -147,21 +147,17 @@ checkSolPairNotInSameClue(pair( fill(Blank1, Val1), fill(Blank2, Val2)), [clue(_
 getFillsVals([], []).
 getFillsVals([fill(_,V) | Fs], [V | MoreVs] ) :- getFillsVals(Fs, MoreVs).
 
-checkFillsHelper(_, []).
-checkFillsHelper(fill(blank(A,B), V), [fill(_, W) | Fs]) :- V \= W, write("asd"), nl, checkFillsHelper(fill(blank(A,B), V), Fs).
-
 checkFillsHelperClues(_,_,[]).
 checkFillsHelperClues(Fill, Fills, [clue(_,_,_, Blanks) | Clues]) :-    blankJoin(Blanks, Fills, Joined), 
-                                                                        %write(Joined), nl,
                                                                         getFillsVals(Joined, Values),
+                                                                        %write(Values), nl,
                                                                         daff(Values),
                                                                         write("necesito llegar aqui x3"), nl,
                                                                         checkFillsHelperClues(Fill, Fills, Clues).
 
 checkFills([], _).
 checkFills(_, []).
-checkFills([Fill | Fills], Clues) :-    write("mmmmm"),nl,
-                                        checkFillsHelperClues(Fill, Fills, Clues),
+checkFills([Fill | Fills], Clues) :-   checkFillsHelperClues(Fill, Fills, Clues),
                                         write("necesito llegar aqui x2"),
                                         checkFills(Fills, Clues).
     
@@ -171,7 +167,9 @@ checkFills([Fill | Fills], Clues) :-    write("mmmmm"),nl,
 % retorna los fills que pertenecen a la lista de blanks dada
 blankJoin([], _, []).
 blankJoin(_, [], []).
-blankJoin(Blanks, [fill(Blank, V) | Fs], [fill(Blank, V) | Joined]) :- member(Blank, Blanks), blankJoin(Blanks, Fs, Joined).
+blankJoin(Blanks, [fill(Blank, V) | Fs], [fill(Blank, V) | Joined]) :- member(Blank, Blanks),  blankJoin(Blanks, Fs, Joined).
+
+blankJoin(Blanks, [_| Fs], Joined) :- blankJoin(Blanks, Fs, Joined).
 
 % returna la suma de una lista de fill
 fillSum([], 0).
@@ -183,14 +181,17 @@ allIn([], _).
 allIn([X | Xs], L) :- member(X, L), allIn(Xs, L).
 
 solMatch([], _).
-solMatch([clue(_,_,V, Blanks) | Clues], Fills) :-   blankJoin(Blanks, Fills, Joined), 
-                                                    getSolBlanks(Fills, SolBlanks),
-                                                    write("aaaa"), nl,
-                                                    allIn(Blanks, SolBlanks),
-                                                    fillSum(Joined, V), 
-                                                    solMatch(Clues, Fills).
+solMatch([clue(_,_,V, Blanks) | Clues], Fills) :-   %write(Blanks), write(" V "), write(V), write(" "), write(Joined), nl,
+                                                    blankJoin(Blanks, Fills, Joined), 
+                                                    checkFillValues(Joined),
+                                                    getFillsVals(Joined, T),
+                                                    daff(T),
+                                                    %write(Blanks), write(" T "), write(T), write(" "), write(Joined), nl,
+                                                    sumlist(T, V), 
+                                                    %write("joined "), write(Joined), write(" blanks "), write(Blanks), write(" V "), write(V), nl,
+                                                    solMatch(Clues, Fills), write("gane ").
 
-                 
+
 
 
 %--- Funciones principales de chequeo ---%
@@ -211,11 +212,12 @@ solutionWorks(Clues, Solution) :-
                                     list_to_set(Blanks, UniqueBlanks),
                                     length(UniqueBlanks, N),
                                     length(Solution, N),
-                                    checkFillValues(Solution),
-                                    checkSolDifferentBlanks(Solution),
+                                    getSolBlanks(Solution, UniqueBlanks),
+                                    solMatch(Clues, Solution),
+                                    write(Solution), nl,
                                     checkFills(Solution, Clues),
-                                    write("necesito que llegues aqui"), nl,
-                                    solMatch(Clues, Solution)
+                                    checkSolDifferentBlanks(Solution),
+                                    write("necesito que llegues aqui"), nl
                                     .
 
 % Revisa si un kakuro es valido y la solucion dada resuelve el kakuro
