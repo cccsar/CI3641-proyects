@@ -68,7 +68,6 @@ allEq([X | T], X) :- allEq(T, X).
 % Obtiene el producto cartesiano de dos listas ignorando los reflexivos
 blanksInRow(clue(Col,Row,_, Blanks)) :- rows(Blanks, Rows),             % get rows
                                         cols(Blanks, Cols),             % Get cols
-                                        write("Everything ok"), nl,
                                         allEq(Rows, Row),      % check that they're all in the same row
                                         length(Blanks, NBlanks),        % get length
                                         Lower is Col + 1,               % get lower bound
@@ -127,7 +126,7 @@ getSolBlanks([fill(B, _) | Fs], [B | MoreBlanks]) :- getSolBlanks(Fs, MoreBlanks
 
 % revisa que los blanks de una solucion sean todos distintos
 fillDiffToAll(_, []).
-fillDiffToAll(fill(blank(A,B), V), [ fill(blank(C,D), _) |Fs]) :- write("aaa"),nl, (A \= C ; B \= D), fillDiffToAll(fill(blank(A,B), V), Fs).
+fillDiffToAll(fill(blank(A,B), V), [ fill(blank(C,D), _) |Fs]) :- (A \= C ; B \= D), fillDiffToAll(fill(blank(A,B), V), Fs).
 
 checkSolDifferentBlanks([]).
 checkSolDifferentBlanks(Fills) :- getSolBlanks(Fills, Blanks), daff(Blanks). 
@@ -150,15 +149,12 @@ getFillsVals([fill(_,V) | Fs], [V | MoreVs] ) :- getFillsVals(Fs, MoreVs).
 checkFillsHelperClues(_,_,[]).
 checkFillsHelperClues(Fill, Fills, [clue(_,_,_, Blanks) | Clues]) :-    blankJoin(Blanks, Fills, Joined), 
                                                                         getFillsVals(Joined, Values),
-                                                                        %write(Values), nl,
                                                                         daff(Values),
-                                                                        write("necesito llegar aqui x3"), nl,
                                                                         checkFillsHelperClues(Fill, Fills, Clues).
 
 checkFills([], _).
 checkFills(_, []).
 checkFills([Fill | Fills], Clues) :-   checkFillsHelperClues(Fill, Fills, Clues),
-                                        write("necesito llegar aqui x2"),
                                         checkFills(Fills, Clues).
     
     
@@ -177,19 +173,13 @@ fillSum([fill(_, V) | Fs], N) :- fillSum(Fs, M), N is M + V.
 
 % indica si las fills de una solución satisfacen a las Clues de un kakuro
 
-allIn([], _).
-allIn([X | Xs], L) :- member(X, L), allIn(Xs, L).
-
 solMatch([], _).                                    % EL PROBLEMA ESTA EN ESTE SOLMATCH
-solMatch([clue(_,_,V, Blanks) | Clues], Fills) :-   %write(Blanks), write(" V "), write(V), write(" "), write(Joined), nl,
-                                                    blankJoin(Blanks, Fills, Joined), 
+solMatch([clue(_,_,V, Blanks) | Clues], Fills) :-   blankJoin(Blanks, Fills, Joined), 
                                                     checkFillValues(Joined),
                                                     getFillsVals(Joined, T),
                                                     daff(T),
-                                                    %write(Blanks), write(" T "), write(T), write(" "), write(Joined), nl,
                                                     sumlist(T, V), 
-                                                    %write("joined "), write(Joined), write(" blanks "), write(Blanks), write(" V "), write(V), nl,
-                                                    solMatch(Clues, Fills), write("gane ").
+                                                    solMatch(Clues, Fills).
 
 
 
@@ -214,15 +204,11 @@ solutionWorks(Clues, Solution) :-
                                     length(Solution, N),
                                     getSolBlanks(Solution, UniqueBlanks),
                                     solMatch(Clues, Solution),
-                                    write(Solution), nl,
                                     checkFills(Solution, Clues),
-                                    checkSolDifferentBlanks(Solution),
-                                    write("necesito que llegues aqui"), nl
-                                    .
+                                    checkSolDifferentBlanks(Solution).
 
 % Revisa si un kakuro es valido y la solucion dada resuelve el kakuro
-valid(kakuro(Clues), Solution) :-   
-    noMoreThanTwoCluesSameCell(Clues), 
+valid(kakuro(Clues), Solution) :-   noMoreThanTwoCluesSameCell(Clues), 
                                     noClueInSomeBlanks(Clues), 
                                     blanksAligned(Clues),
                                     almostDisjointBlanks(Clues), 
@@ -230,9 +216,9 @@ valid(kakuro(Clues), Solution) :-
 
 % read some kakuro
 openKakuro(Kakuro, FileToOpen) :-   open(FileToOpen, read, Strm),
-read(Strm, Kakuro).
+                                    read(Strm, Kakuro).
 
 readKakuro(Kakuro) :-   write("Dame un archivo para leer: "),
-nl,
-read(File),
-openKakuro(Kakuro, File).
+                        nl,
+                        read(File),
+                        openKakuro(Kakuro, File).
