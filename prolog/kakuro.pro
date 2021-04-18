@@ -23,7 +23,6 @@ daff(X) :-
     length(S,M),
     M =:= N.
 
-
 % clues positions as cells
 cluePositions([], []).
 cluePositions([clue(Col, Row, _, _) | CluesTail], [blank(Col, Row) | CellsTail ]) :- cluePositions(CluesTail, CellsTail). 
@@ -32,10 +31,6 @@ cluePositions([clue(Col, Row, _, _) | CluesTail], [blank(Col, Row) | CellsTail ]
 frec(_, [], 0).
 frec(X, [X | T], N) :- frec(X, T, M), N is M + 1.
 frec(X, [Y| T], N)  :- frec(X, T, N), X\=Y.
-
-% Revisa que no hayan duplicados
-noDuplicates([]).
-noDuplicates([X | Xs]) :- frec(X, Xs, 0), noDuplicates(Xs).
 
 % Indica los elementos de la primera lista aparecen menos de dos veces en la lista L
 checkFrec([], _).
@@ -86,23 +81,6 @@ blanksInCol(clue(Col,Row,_, Blanks)) :- rows(Blanks, Rows),             % get ro
                                         sumInRange(Lower, Upper, Sum),  % Calcula suma entre inferior y superior
                                         sum_list(Rows, Sum).            % Revisa que todos los elementos sean distintos
 
-% El producto cruz entre dos listas 
-
-%   crea pares tal que el primer elemento es X, y el segundo pertenece a la lista
-mkPairs(_, [], []). 
-mkPairs(X, [Y | YS], [pair(X,Y) | MorePairs]) :- mkPairs(X, YS, MorePairs). 
-
-%   calcula producto cartesiano
-cross([], _, []).
-cross(_, [], []).
-cross([X | XS], YS, All) :- mkPairs(X, YS, WX), cross(XS, YS, WT), append(WX, WT, All).
-
-%   elimina los simetricos
-noSym([], []).
-noSym([pair(X,X) | Ps], NoSymPs) :- noSym(Ps, NoSymPs).
-noSym([pair(X,Y) | Ps], [pair(X,Y) | NoSymPs]) :- 
-    noSym(Ps, NoSymPs).
-
 %   Revisa si todos los apres de clues en una lista comparten a lo sumo una celda en sus blanks
 almostDisjointBlanksHelper(_, []).
 almostDisjointBlanksHelper(clue(X,Y,V, B1), [clue(_,_,_, B2) |Clues]) :- intersection(B1, B2, Inter), 
@@ -123,24 +101,9 @@ checkFillValues([fill(blank(_,_), X ) | Fs]) :- member(X, [1,2,3,4,5,6,7,8,9]), 
 getSolBlanks([], []).
 getSolBlanks([fill(B, _) | Fs], [B | MoreBlanks]) :- getSolBlanks(Fs, MoreBlanks).
 
-
-% revisa que los blanks de una solucion sean todos distintos
-fillDiffToAll(_, []).
-fillDiffToAll(fill(blank(A,B), V), [ fill(blank(C,D), _) |Fs]) :- (A \= C ; B \= D), fillDiffToAll(fill(blank(A,B), V), Fs).
-
 checkSolDifferentBlanks([]).
 checkSolDifferentBlanks(Fills) :- getSolBlanks(Fills, Blanks), daff(Blanks). 
 
-% revisa que no hayan pares con el mismo numero en la misma blank
-checkSolPairNotInSameClue(_, []).
-checkSolPairNotInSameClue(pair( fill(Blank1, Val1), fill(Blank2, Val2)), [clue(_,_,_, Blanks) | Clues]) :-
-    ( 
-        
-        not(member(Blank1, Blanks)) ;
-        not(member(Blank2, Blanks)) ;
-        Val1 \= Val2
-    ),
-    checkSolPairNotInSameClue(pair( fill(Blank1, Val1), fill(Blank2, Val2)), Clues).
 
 % Revisa que una lista fills no tenga dos elementos con el mismo valor en la misma clue
 getFillsVals([], []).
@@ -202,7 +165,7 @@ solutionWorks(Clues, Solution) :-
                                     list_to_set(Blanks, UniqueBlanks),
                                     length(UniqueBlanks, N),
                                     length(Solution, N),
-                                    getSolBlanks(Solution, UniqueBlanks),
+                                    getSolBlanks(Solution, UniqueBlanks), % Hacemos esto para tener el boost de performance de no revisar permutaciones de la misma sol.
                                     solMatch(Clues, Solution),
                                     checkFills(Solution, Clues),
                                     checkSolDifferentBlanks(Solution).
