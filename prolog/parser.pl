@@ -10,7 +10,7 @@ main(X) :-
 % # Carlos and Alex made a great project for class
 
 
-my_parse(X) :- adverb(X,[]).
+my_parse(AST,L) :- adverb(AST,L,[]).
 
 % Non terminals
 
@@ -67,34 +67,33 @@ conjunctor  --> nominal, [and], conjunctor.
 conjunctor  --> nominal, [,], conjunctor.
 conjunctor  --> nominal.
 
-nominal     --> noun.
-nominal     --> name.
+nominal([nominal, Nom])     --> noun(Nom),!.
+nominal([nominal, Nom])     --> name(Nom),!.
 
 % Terminals
-name        --> [N], { downcase_atom(N,T), not(member(T,[i,she,he,you,we,they])),nameCheck(N) }.
-name        --> [N], { downcase_atom(N,T), not(member(T,[i,she,he,you,we,they])),nameCheck(N) }, name.
+name([name,Name])                   --> [Name], { downcase_atom(Name,T), not(member(T,[i,she,he,you,we,they])),nameCheck(Name), ! }.
+%name([[name,Name],[name,X]])        --> [Name], { downcase_atom(Name,T), not(member(T,[i,she,he,you,we,they])),nameCheck(Name), ! }, name(X).
 
-noun        --> [N], { member(N,[movie,book,music,film,project,class,gamer,afternoon]) }. 
-noun        --> [N], { atom_concat(X,s,N), member(X,[movie,book,music,film,project,class,gamer,afternoon]) }.
+noun([noun,Noun])        --> [Noun], { member(Noun,[movie,book,music,film,project,class,gamer,afternoon]),! }. 
+noun([noun,Noun])        --> [Noun], { atom_concat(X,s,Noun), member(X,[movie,book,music,film,project,class,gamer,afternoon]),!}.
 
-tpPronouns  --> [N], { member(N,[he,she,it]) }.
-tpPronouns  --> [N], { nameCheck(N), downcase_atom(N,T), member(T,[he,she,it]) }.
+tpPronouns([tpPronoun,PN])  --> [PN], { member(PN,[he,she,it]) , !}.
+tpPronouns([tpPronoun,PN])  --> [PN], { nameCheck(PN), downcase_atom(PN,T), member(T,[he,she,it]) , !}.
 
-remPronouns --> [N], { member(N,[i,you,we,they]) }.
-remPronouns --> [N], { nameCheck(N), downcase_atom(N,T), member(T,[i,you,we,they]) }.
+remPronouns([remPronoun,Rpn]) --> [Rpn], { member(Rpn,[i,you,we,they]) , !}.
+remPronouns([remPronoun,Rpn]) --> [Rpn], { nameCheck(Rpn), downcase_atom(Rpn,T), member(T,[i,you,we,they]), !}.
 
-verb        --> [V], { member(V,[go,present,like,eat,work,make,play,watch,went,presented,liked,ate,worked,made,played,watched]) }.
+verb([verb,V])       --> [V], { member(V,[go,present,like,eat,work,make,play,watch,went,presented,liked,ate,worked,made,played,watched]) , !}.
 
-tpVerb      --> [V], { member(V,[goes,presents,likes,eats,works,plays,watches]) }.
+tpVerb([tpVerb, V])      --> [V], { member(V,[goes,presents,likes,eats,works,plays,watches]) , !}.
 
-preposition --> [P], { member(P,[in,for,at,with,from,to,on,near]) }.
+preposition([preposition,Pre]) --> [Pre], { member(Pre,[in,for,at,with,from,to,on,near]) , !}.
 
-adjective   --> [A], { member(A,[great,new,yellow]) }.
+adjective([adjective,Adj])   --> [Adj], { member(Adj,[great,new,yellow]) }.
 
-determiner  --> [D], { member(D,[the,a,an,this,these,that]) }. 
+determiner([determiner, Det])  --> [Det], { member(Det,[the,a,an,this,these,that]) , !}. 
 
-adverb      --> [Adv], { member(Adv,[today,tomorrow]) }.
-
+adverb([adverb, Adv])   --> [Adv], { member(Adv,[today,tomorrow]), ! }.  
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
