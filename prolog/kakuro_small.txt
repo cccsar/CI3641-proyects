@@ -1,0 +1,6 @@
+kakuro([
+    clue(2,1,17,[blank(2,2), blank(2,3)]),
+    clue(3,1,16,[blank(3,2), blank(3,3)]),
+    clue(1,2,16,[blank(2,2), blank(3,2)]),
+    clue(1,3,17,[blank(2,3), blank(3,3)])
+]).
