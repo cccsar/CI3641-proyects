@@ -160,8 +160,7 @@ noClueInSomeBlanks(Clues) :- blanks(Clues, Blanks), cluePositions(Clues, Cells),
 blanksAligned([]).
 blanksAligned([Clue | MoreClues]) :- (blanksInCol(Clue); blanksInRow(Clue)), blanksAligned(MoreClues).
 
-solutionWorks(Clues, Solution) :-   
-                                    blanks(Clues, Blanks),
+solutionWorks(Clues, Solution) :-   blanks(Clues, Blanks),
                                     list_to_set(Blanks, UniqueBlanks),
                                     length(UniqueBlanks, N),
                                     length(Solution, N),
@@ -175,7 +174,10 @@ valid(kakuro(Clues), Solution) :-   noMoreThanTwoCluesSameCell(Clues),
                                     noClueInSomeBlanks(Clues), 
                                     blanksAligned(Clues),
                                     almostDisjointBlanks(Clues), 
-                                    solutionWorks(Clues, Solution).
+                                    solutionWorks(Clues, Solution),
+                                    not((solutionWorks(Clues, X), X \= Solution)).
+                                    
+                                    
 
 % read some kakuro
 openKakuro(Kakuro, FileToOpen) :-   open(FileToOpen, read, Strm),
