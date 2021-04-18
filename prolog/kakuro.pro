@@ -143,23 +143,27 @@ checkSolPairNotInSameClue(pair( fill(Blank1, Val1), fill(Blank2, Val2)), [clue(_
     ),
     checkSolPairNotInSameClue(pair( fill(Blank1, Val1), fill(Blank2, Val2)), Clues).
 
-% revisa que los pares de una lista de pares de fills esten todos bien respecto a una lista de clues
-checkFillsPairsOk([P1 | Ps], Clues) :- checkSolPairNotInSameClue(P1, Clues), 
-                                       checkFillsPairsOk(Ps, Clues).
-
 % Revisa que una lista fills no tenga dos elementos con el mismo valor en la misma clue
+getFillsVals([], []).
+getFillsVals([fill(_,V) | Fs], [V | MoreVs] ) :- getFillsVals(Fs, MoreVs).
+
 checkFillsHelper(_, []).
-checkFillsHelper(fill(blank(A,B), V), [fill(_, W) | Fs]) :- V \= W, checkFillsHelper(fill(blank(A,B), V), Fs).
+checkFillsHelper(fill(blank(A,B), V), [fill(_, W) | Fs]) :- V \= W, write("asd"), nl, checkFillsHelper(fill(blank(A,B), V), Fs).
 
 checkFillsHelperClues(_,_,[]).
-checkFillsHelperClues(Fill, Fills, [clue(_,_,_, Blanks), Clues]) :- blankJoin(Blanks, Fills, Joined), 
-                                                                    checkFillsHelper(Fill, Joined),
-                                                                    checkFillsHelperClues(Fill, Fills, Clues).
+checkFillsHelperClues(Fill, Fills, [clue(_,_,_, Blanks) | Clues]) :-    blankJoin(Blanks, Fills, Joined), 
+                                                                        %write(Joined), nl,
+                                                                        getFillsVals(Joined, Values),
+                                                                        daff(Values),
+                                                                        write("necesito llegar aqui x3"), nl,
+                                                                        checkFillsHelperClues(Fill, Fills, Clues).
 
 checkFills([], _).
 checkFills(_, []).
-checkFills([Fill | Fills], Clues) :- checkFillsHelperClues(Fill, Fills, Clues),
-                                     checkFills(Fills, Clues).
+checkFills([Fill | Fills], Clues) :-    write("mmmmm"),nl,
+                                        checkFillsHelperClues(Fill, Fills, Clues),
+                                        write("necesito llegar aqui x2"),
+                                        checkFills(Fills, Clues).
     
     
 
@@ -175,8 +179,8 @@ fillSum([fill(_, V) | Fs], N) :- fillSum(Fs, M), N is M + V.
 
 % indica si las fills de una solución satisfacen a las Clues de un kakuro
 
-allIn([X | Xs], L) :- member(X, L), allIn(Xs, L).
 allIn([], _).
+allIn([X | Xs], L) :- member(X, L), allIn(Xs, L).
 
 solMatch([], _).
 solMatch([clue(_,_,V, Blanks) | Clues], Fills) :-   blankJoin(Blanks, Fills, Joined), 
@@ -210,7 +214,7 @@ solutionWorks(Clues, Solution) :-
                                     checkFillValues(Solution),
                                     checkSolDifferentBlanks(Solution),
                                     checkFills(Solution, Clues),
-                                    write(Solution), nl,
+                                    write("necesito que llegues aqui"), nl,
                                     solMatch(Clues, Solution)
                                     .
 
