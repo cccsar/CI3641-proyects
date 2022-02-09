@@ -1,2 +1,2 @@
-# Proyectos-Lenguajes-I
-Proyectos de la materia Lenguajes de programacion I
+# CI3641-proyects
+Proyects for *Programming Languages* - CI3641 subject.
